@@ -1,13 +1,14 @@
 // Landing.tsx
 import styles from "./LandingPage.module.css";
 import { useNavigate } from "react-router-dom";
+import LandingPageBg from "../assets/images/LandingPage_Background.png";
 
 export default function LandingPage() {
   const navigate = useNavigate();
 
   return (
     <div className={styles.page}>
-      <div className={styles.panel}>
+      <div className={styles.panel} style={{ backgroundImage: `url(${LandingPageBg})` }}>
 
         <header className={styles.navbar}>
           <nav className={styles.navLeft}>

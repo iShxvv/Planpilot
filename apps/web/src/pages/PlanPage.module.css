@@ -220,17 +220,309 @@
   color: rgba(255, 255, 255, 0.55);
 }
 
+.chatInput:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .chatSend {
   width: 56px;
   height: 56px;
   border-radius: 999px;
   border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(255, 255, 255, 0.08);
+  background: #E4B5FF;
+  color: #111;
+  font-size: 24px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 120ms ease;
 }
 
-.chatSend:hover {
-  background: rgba(255, 255, 255, 0.12);
+.chatSend:hover:not(:disabled) {
+  background: #d9a5f5;
+  transform: translateY(-1px);
+}
+
+.chatSend:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Chat Messages */
+.chatMessages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.chatMessages::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chatMessages::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.emptyState {
+  margin-top: 40px;
+  text-align: center;
+}
+
+.userMessage {
+  align-self: flex-end;
+  max-width: 85%;
+}
+
+.assistantMessage {
+  align-self: flex-start;
+  max-width: 95%;
+}
+
+.messageContent {
+  background: rgba(228, 181, 255, 0.15);
+  border: 1px solid rgba(228, 181, 255, 0.25);
+  border-radius: 16px;
+  padding: 12px 16px;
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 15px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+.userMessage .messageContent {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Typing Indicator */
+.typingIndicator {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  padding: 4px 0;
+}
+
+.typingIndicator span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(228, 181, 255, 0.7);
+  animation: typing 1.4s infinite;
+}
+
+.typingIndicator span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typingIndicator span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing {
+  0%, 60%, 100% {
+    opacity: 0.3;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-8px);
+  }
+}
+
+/* Research List */
+.researchList {
+  margin-top: 12px;
+  background: rgba(10, 6, 16, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.researchTitle {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.researchItems {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.researchCard {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  gap: 12px;
+  transition: all 120ms ease;
+}
+
+.researchCard:hover {
+  background: rgba(255, 255, 255, 0.08);
+  transform: translateY(-1px);
+}
+
+.researchImage {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  background-size: cover;
+  background-position: center;
+  flex-shrink: 0;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.researchContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.researchType {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: rgba(228, 181, 255, 0.9);
+  font-weight: 600;
+}
+
+.researchName {
+  font-size: 16px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.researchDesc {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.4;
+}
+
+.researchMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.researchCost {
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(228, 181, 255, 0.95);
+}
+
+.researchLink {
+  font-size: 13px;
+  color: rgba(228, 181, 255, 0.9);
+  text-decoration: none;
+  transition: color 120ms ease;
+}
+
+.researchLink:hover {
+  color: rgba(228, 181, 255, 1);
+  text-decoration: underline;
+}
+
+/* Schedule View */
+.scheduleView {
+  margin-top: 12px;
+  background: rgba(10, 6, 16, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px;
+}
+
+.scheduleViewTitle {
+  font-size: 17px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.scheduleItems {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scheduleCard {
+  display: flex;
+  gap: 14px;
+  padding: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+}
+
+.scheduleTime {
+  font-size: 16px;
+  font-weight: 700;
+  color: rgba(228, 181, 255, 0.95);
+  min-width: 60px;
+}
+
+.scheduleDetails {
+  flex: 1;
+}
+
+.scheduleActivity {
+  font-size: 15px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.95);
+  margin-bottom: 4px;
+}
+
+.scheduleNotes {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.4;
+}
+
+/* Event Details */
+.eventDetails {
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.detailRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.detailRow:last-child {
+  border-bottom: none;
+}
+
+.detailLabel {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.65);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+}
+
+.detailValue {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.95);
+  font-weight: 500;
+  text-align: right;
 }
 
 .scheduleHeaderRow {

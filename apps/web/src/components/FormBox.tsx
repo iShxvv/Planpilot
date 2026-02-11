@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./FormComponents.module.css";
+import { sendEventMessage } from "../api";
 
 
 const FormBox = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [submittedData, setSubmittedData] = useState(null);
 
   const [formData, setFormData] = useState({
     eventType: "",
@@ -18,20 +18,27 @@ const FormBox = () => {
 
   const navigate = useNavigate();
 
-  const updateForm = (updates) => {
+  const updateForm = (updates: Partial<typeof formData>) => {
     setFormData((prev) => ({ ...prev, ...updates }));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     // Go to loading step
     setLoading(true);
 
-    // Simulate contacting backend
-    setTimeout(() => {
-      setSubmittedData(formData); 
+    // Construct a natural language message from the form data
+    const message = `I'd like to create ${formData.eventType}. It will be on ${formData.eventDateRange} in ${formData.eventLocation}. I'm expecting ${formData.numberOfAttendees} people to attend, and my budget is ${formData.budget}.`;
+
+    try {
+      // Call the n8n API
+      const response = await sendEventMessage(message);
+
+      // Navigate to plan page with the response
+      navigate("/plan", { state: { initialResponse: response, formData } });
+    } catch (error) {
+      console.error("Error submitting event:", error);
       setLoading(false);
-      setStep(step + 1); 
-    }, 2000); 
+    }
   };
 
   if (loading) {
@@ -39,17 +46,6 @@ const FormBox = () => {
       <div className={styles.box}>
         <h2>Submitting your event...</h2>
         <div className={styles.loader}></div>
-      </div>
-    );
-  }
-
-  if (submittedData) {
-    return (
-      <div className={styles.box}>
-        <h2>Event Submitted</h2>
-        Fetch response from Backend and display here
-        <button className={styles.button} 
-        onClick={() => navigate("/plan")}>Start Plan</button>
       </div>
     );
   }

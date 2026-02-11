@@ -16,7 +16,7 @@
   height: 100vh;
 
   /* main background colour */
-  background: #36293D;
+  background: #36293D url('../../assets/images/LandingPage_Background.png');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

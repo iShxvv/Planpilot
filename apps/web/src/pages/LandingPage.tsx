@@ -9,14 +9,9 @@ export default function LandingPage() {
         <header className={styles.navbar}>
           <nav className={styles.navLeft}>
             <div className={styles.navItem}>planpilot</div>
-            <div className={styles.navItem}>about</div>
+            
           </nav>
 
-          <nav className={styles.navRight}>
-            <div className={styles.navItem}>some</div>
-            <div className={styles.navItem}>menu</div>
-            <div className={styles.navItem}>items</div>
-          </nav>
         </header>
 
         <main className={styles.hero}>
@@ -25,7 +20,7 @@ export default function LandingPage() {
           <button className={styles.cta}>Get Started</button>
         </main>
 
-        <div className={styles.learnMore}>Learn More</div>
+        
       </div>
     </div>
   );

@@ -1,0 +1,264 @@
+.promptContainer {
+  width: 900px;
+  min-height: 400px;
+  padding: 48px;
+  border-radius: 16px;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Stage 1: Initial Input */
+.mainHeading {
+  font-size: 52px;
+  color: white;
+  margin: 0 0 48px 0;
+  text-align: left;
+  font-weight: 600;
+}
+
+.aiPrompt {
+  font-size: 24px;
+  color: #E4B5FF;
+  margin: 0 0 24px 0;
+  text-align: left;
+}
+
+.userInput {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid #594464;
+  color: white;
+  font-size: 36px;
+  padding: 12px 0;
+  margin-bottom: 24px;
+  outline: none;
+}
+
+.userInput::placeholder {
+  color: #594464;
+}
+
+.bottomRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 24px;
+}
+
+.disclaimer {
+  font-size: 24px;
+  color: #594464;
+  margin: 0;
+  text-align: left;
+}
+
+.submitButton {
+  width: 100px;
+  height: 50px;
+  background: #E4B5FF;
+  color: #000000;
+  border: none;
+  border-radius: 21px;
+  font-size: 24px;
+  font-weight: 300;
+  cursor: pointer;
+  opacity: 1;
+  transition: 0.2s ease;
+}
+
+.submitButton:hover {
+  filter: brightness(1.1);
+}
+
+/* Stage 2: Loading */
+.userPromptDisplay {
+  font-size: 36px;
+  color: #594464;
+  margin: 0 0 48px 0;
+  text-align: left;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
+}
+
+.loadingBar {
+  width: 311.36px;
+  height: 13.29px;
+  background: #594464;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+}
+
+.loadingBarFill {
+  height: 100%;
+  background: #E4B5FF;
+  border-radius: 10px;
+  animation: loading 2s ease-in-out infinite;
+}
+
+@keyframes loading {
+  0% {
+    width: 0%;
+  }
+  50% {
+    width: 70%;
+  }
+  100% {
+    width: 100%;
+  }
+}
+
+/* Stage 3: Complete */
+.optionsContainer {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+  margin-bottom: 32px;
+}
+
+.optionWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.optionButton {
+  width: auto;
+  height: 50px;
+  background: #594464;
+  color: white;
+  border: none;
+  border-radius: 21px;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+.optionButton:hover {
+  filter: brightness(1.1);
+}
+
+.removeButton {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  background: #594464;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  padding: 0;
+  transition: 0.2s ease;
+}
+
+.optionWrapper:hover .removeButton {
+  display: flex;
+}
+
+.removeButton:hover {
+  background: #ff5f5f;
+  transform: scale(1.1);
+}
+
+.buttonGroup {
+  position: absolute;
+  bottom: 48px;
+  right: 48px;
+  display: flex;
+  gap: 16px;
+}
+
+.backButton {
+  width: 80px;
+  height: 50px;
+  background: #594464;
+  color: white;
+  border: none;
+  border-radius: 21px;
+  font-size: 24px;
+  font-weight: 300;
+  cursor: pointer;
+  opacity: 1;
+  transition: 0.2s ease;
+}
+
+.backButton:hover {
+  filter: brightness(1.2);
+}
+
+.startPlanningButton {
+  width: 180px;
+  height: 50px;
+  background: #E4B5FF;
+  color: #111;
+  border: none;
+  border-radius: 21px;
+  font-size: 24px;
+  font-weight: 300;
+  cursor: pointer;
+  opacity: 1;
+  transition: 0.2s ease;
+}
+
+.startPlanningButton:hover {
+  filter: brightness(1.1);
+}
+
+.subHeading {
+  font-size: 48px;
+  color: white;
+  margin: 0 0 24px 0;
+  text-align: left;
+  font-weight: 600;
+}
+
+.addButton {
+  width: 50px;
+  height: 50px;
+  background: #594464;
+  color: white;
+  border: none;
+  border-radius: 21px;
+  font-size: 48px;
+  font-weight: 300;
+  cursor: pointer;
+  transition: 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.addButton:hover {
+  filter: brightness(1.1);
+}
+
+.optionInput {
+  width: 120px;
+  height: 50px;
+  background: #594464;
+  color: white;
+  border: none;
+  border-radius: 21px;
+  font-size: 18px;
+  font-weight: 600;
+  padding: 0 16px;
+  text-align: center;
+  outline: none;
+}
+
+.optionInput::placeholder {
+  color: rgba(255, 255, 255, 0.7);
+}

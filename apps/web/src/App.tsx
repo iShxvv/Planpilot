@@ -1,5 +1,14 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from "./pages/LandingPage.tsx";
+import FormPage from "./pages/FormPage.tsx";
 
 export default function App() {
-  return <LandingPage />;
+  return (
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/form" element={<FormPage />} />
+      </Routes>
+    </Router>
+  );
 }

@@ -1,42 +1,96 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./InitialUserPromptContainer.module.css";
 
-type Stage = "initial" | "loading" | "complete";
+type Stage = "initial" | "clarifying" | "loading" | "complete";
 
 const InitialUserPromptContainer = () => {
   const [stage, setStage] = useState<Stage>("initial");
   const [userInput, setUserInput] = useState("");
+  const [userMessages, setUserMessages] = useState<string[]>([]);
+  const [clarifyingCount, setClarifyingCount] = useState(0);
+  const [currentPrompt, setCurrentPrompt] = useState("What kind of event are you planning?");
   const [customOptions, setCustomOptions] = useState<string[]>([]);
   const [isAddingOption, setIsAddingOption] = useState(false);
   const [newOptionText, setNewOptionText] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const navigate = useNavigate();
+
+  // Auto-resize textarea (max 3 lines)
+  useEffect(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      const scrollHeight = textareaRef.current.scrollHeight;
+      const lineHeight = 43; // Approximate line height for 36px font
+      const maxHeight = lineHeight * 3;
+      textareaRef.current.style.height = Math.min(scrollHeight, maxHeight) + 'px';
+    }
+  }, [userInput]);
+
+  // Hardcoded AI responses for clarifying stage
+  const clarifyingPrompts = [
+    "Great! When are you planning to have this event?",
+    "Perfect! Where would you like to host this event?",
+    "Thank you! I have all the information I need to create your plan."
+  ];
 
   const handleSubmit = () => {
     if (!userInput.trim()) return;
     
-    setStage("loading");
-    
-    // Send the user input to backend AI workflow
-    setTimeout(() => {
-      setStage("complete");
-    }, 3000);
+    if (stage === "initial") {
+      // First message - go to clarifying stage
+      setUserMessages([userInput]);
+      setCurrentPrompt(clarifyingPrompts[0]);
+      setStage("clarifying");
+      setUserInput("");
+      setClarifyingCount(0);
+    } else if (stage === "clarifying") {
+      // Add message to user messages
+      const updatedMessages = [...userMessages, userInput];
+      setUserMessages(updatedMessages);
+      
+      const newCount = clarifyingCount + 1;
+      setClarifyingCount(newCount);
+      
+      if (newCount >= 2) {
+        // After 2 clarifying messages, go to loading
+        setStage("loading");
+        setTimeout(() => {
+          setStage("complete");
+        }, 3000);
+      } else {
+        // Continue clarifying
+        setCurrentPrompt(clarifyingPrompts[newCount]);
+        setUserInput("");
+      }
+    }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter") {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
       handleSubmit();
     }
   };
 
   const handleStartPlanning = () => {
-    // Log collected options for backend
+    // Log collected options and user messages for backend
+    console.log("User messages:", userMessages);
     console.log("User wants to add:", customOptions.join(", "));
     navigate("/plan");
   };
 
   const handleBack = () => {
-    setStage("initial");
+    if (stage === "complete") {
+      // Combine all user messages and put back in text area
+      setUserInput(userMessages.join(" "));
+      setStage("initial");
+    } else {
+      setStage("initial");
+      setUserMessages([]);
+      setClarifyingCount(0);
+      setCurrentPrompt("What kind of event are you planning?");
+    }
   };
 
   const handleAddOption = () => {
@@ -55,10 +109,15 @@ const InitialUserPromptContainer = () => {
     setCustomOptions(customOptions.filter((_, i) => i !== index));
   };
 
-  const handleOptionKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleOptionKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
       handleSaveOption();
     }
+  };
+
+  // Get combined user messages for display
+  const getCombinedUserMessages = () => {
+    return userMessages.join(" ");
   };
 
   return (
@@ -66,14 +125,43 @@ const InitialUserPromptContainer = () => {
       {stage === "initial" && (
         <>
           <h1 className={styles.mainHeading}>Let's get your event started</h1>
-          <p className={styles.aiPrompt}>What kind of event are you planning?</p>
-          <input
-            type="text"
+          <p className={styles.aiPrompt}>{currentPrompt}</p>
+          <textarea
+            ref={textareaRef}
             className={styles.userInput}
             value={userInput}
             onChange={(e) => setUserInput(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyDown}
             placeholder=""
+            rows={1}
+          />
+          <div className={styles.bottomRow}>
+            <p className={styles.disclaimer}>Feel free to explain your answer approximately</p>
+            <button className={styles.submitButton} onClick={handleSubmit}>
+              Next
+            </button>
+          </div>
+        </>
+      )}
+
+      {stage === "clarifying" && (
+        <>
+          <div className={styles.previousAnswers}>
+            {userMessages.map((msg, index) => (
+              <p key={index} className={styles.previousAnswer}>
+                {msg}
+              </p>
+            ))}
+          </div>
+          <p className={styles.aiPrompt}>{currentPrompt}</p>
+          <textarea
+            ref={textareaRef}
+            className={styles.userInput}
+            value={userInput}
+            onChange={(e) => setUserInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder=""
+            rows={1}
           />
           <div className={styles.bottomRow}>
             <p className={styles.disclaimer}>Feel free to explain your answer approximately</p>
@@ -87,7 +175,7 @@ const InitialUserPromptContainer = () => {
       {stage === "loading" && (
         <>
           <h1 className={styles.mainHeading}>Creating your plan now</h1>
-          <p className={styles.userPromptDisplay}>{userInput}</p>
+          <p className={styles.userPromptDisplay}>{getCombinedUserMessages()}</p>
           <div className={styles.loadingBar}>
             <div className={styles.loadingBarFill}></div>
           </div>
@@ -117,7 +205,7 @@ const InitialUserPromptContainer = () => {
                 className={styles.optionInput}
                 value={newOptionText}
                 onChange={(e) => setNewOptionText(e.target.value)}
-                onKeyDown={handleOptionKeyPress}
+                onKeyDown={handleOptionKeyDown}
                 onBlur={handleSaveOption}
                 autoFocus
                 placeholder="Type option..."

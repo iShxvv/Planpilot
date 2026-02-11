@@ -35,6 +35,11 @@
   padding: 12px 0;
   margin-bottom: 24px;
   outline: none;
+  resize: none;
+  overflow: hidden;
+  max-height: 120px;
+  font-family: inherit;
+  line-height: 1.2;
 }
 
 .userInput::placeholder {
@@ -261,4 +266,22 @@
 
 .optionInput::placeholder {
   color: rgba(255, 255, 255, 0.7);
+}
+
+/* Clarifying Stage */
+.previousAnswers {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.previousAnswer {
+  font-size: 36px;
+  color: #594464;
+  margin: 0;
+  text-align: left;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  max-width: 100%;
 }

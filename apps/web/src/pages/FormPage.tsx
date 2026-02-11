@@ -1,5 +1,6 @@
 import styles from "./FormPage.module.css";
 import FormBox from "../components/FormBox";
+import { useNavigate } from "react-router-dom";
 
 export default function FormPage() {
   return (

@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styles from "./FormComponents.module.css";
+
 
 const FormBox = () => {
   const [step, setStep] = useState(1);
@@ -13,6 +15,8 @@ const FormBox = () => {
     numberOfAttendees: "",
     budget: "",
   });
+
+  const navigate = useNavigate();
 
   const updateForm = (updates) => {
     setFormData((prev) => ({ ...prev, ...updates }));
@@ -44,7 +48,8 @@ const FormBox = () => {
       <div className={styles.box}>
         <h2>Event Submitted</h2>
         Fetch response from Backend and display here
-        <button className={styles.button}>Start Plan</button>
+        <button className={styles.button} 
+        onClick={() => navigate("/plan")}>Start Plan</button>
       </div>
     );
   }

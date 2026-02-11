@@ -1,7 +1,10 @@
 // Landing.tsx
 import styles from "./LandingPage.module.css";
+import { useNavigate } from "react-router-dom";
 
 export default function LandingPage() {
+  const navigate = useNavigate();
+
   return (
     <div className={styles.page}>
       <div className={styles.panel}>
@@ -17,7 +20,9 @@ export default function LandingPage() {
         <main className={styles.hero}>
           <h1 className={styles.title}>PlanPilot</h1>
           <p className={styles.subtitle}>We take the guesswork out of your events</p>
-          <button className={styles.cta}>Get Started</button>
+          <button 
+          className={styles.cta} 
+          onClick={() => navigate("/form")}>Get Started</button>
         </main>
 
         

@@ -429,54 +429,87 @@ export interface BudgetEstimateResponse {
  * @param userMessage - The user's budget query message
  * @returns Budget estimate with venue and catering costs
  */
-export const fetchBudgetEstimate = async (
-    plan: EventPlan,
-    userMessage: string = "What's my budget?"
-): Promise<BudgetEstimateResponse> => {
+/**
+ * Calculate budget estimate locally based on plan modules
+ * @param plan - Current event plan
+ * @returns Budget estimate with venue and catering costs
+ */
+export const calculateBudgetEstimate = (
+    plan: EventPlan
+): BudgetEstimateResponse => {
     try {
-        const N8N_BUDGET_WEBHOOK = import.meta.env.VITE_N8N_BUDGET_WEBHOOK_URL ||
-            "https://shxvv.app.n8n.cloud/webhook/adcf1994-1aa7-4df9-af86-7afe7dc05459";
+        const guestCount = plan.eventMetadata.guestCount || 50;
+        const targetAmount = plan.budget.targetAmount || 0;
 
-        console.log("Fetching budget estimate from n8n:", N8N_BUDGET_WEBHOOK);
+        // --- Helper to get cost from a module ---
+        const getModuleCost = (moduleKey: string, isPerPerson: boolean = false): number => {
+            const mod = plan.modules[moduleKey];
+            if (!mod) return 0;
 
-        // Transform plan to match n8n expected format
-        // n8n expects: plan.eventMetadata.budget.total
-        // We have: plan.budget.targetAmount
-        const transformedPlan = {
-            ...plan,
-            eventMetadata: {
-                ...plan.eventMetadata,
-                budget: {
-                    total: plan.budget.targetAmount || null
-                }
+            // 1. Preferred: Selected Choice
+            if (mod.selectedChoice && mod.selectedChoice.priceEstimate) {
+                return isPerPerson
+                    ? mod.selectedChoice.priceEstimate * guestCount
+                    : mod.selectedChoice.priceEstimate;
             }
+
+            // 2. Fallback: Average of Candidates
+            if (mod.candidates && mod.candidates.length > 0) {
+                const validCandidates = mod.candidates.filter(c => c.priceEstimate > 0);
+                if (validCandidates.length === 0) return 0;
+
+                const sum = validCandidates.reduce((acc, c) => acc + c.priceEstimate, 0);
+                const avg = sum / validCandidates.length;
+
+                return isPerPerson ? avg * guestCount : avg;
+            }
+
+            return 0;
         };
 
-        console.log("Sending transformed plan:", transformedPlan);
-        console.log("User message:", userMessage);
+        // --- Calculate Costs ---
+        const venueCost = getModuleCost('venue', false);
+        const cateringCost = getModuleCost('catering', true); // Catering is usually per person
+        const entertainmentCost = getModuleCost('entertainment', false);
 
-        const response = await fetch(N8N_BUDGET_WEBHOOK, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                user_message: userMessage,
-                plan: transformedPlan
-            }),
-        });
+        // Sum of module costs
+        const totalEstimated = venueCost + cateringCost + entertainmentCost;
 
-        if (!response.ok) {
-            throw new Error(`Budget API error: ${response.status}`);
+        // --- Determine Status ---
+        let status: "plausible" | "over_budget" | "no_budget" = "plausible";
+        if (targetAmount === 0) {
+            status = "no_budget";
+        } else if (totalEstimated > targetAmount) {
+            status = "over_budget";
         }
 
-        const data = await response.json();
-        console.log("Budget estimate response:", data);
+        const difference = targetAmount > 0 ? targetAmount - totalEstimated : null;
 
-        return data;
+        return {
+            venue_cost_aud: venueCost,
+            catering_cost_aud: cateringCost,
+            total_estimated_aud: totalEstimated,
+            budget_total_aud: targetAmount,
+            difference_aud: difference,
+            status: status,
+            assumptions: [
+                "Venue cost based on selection or average of options",
+                `Catering cost based on ${guestCount} guests`,
+                "Entertainment cost included in total"
+            ]
+        };
     } catch (error: any) {
-        console.error("Error fetching budget estimate:", error);
-        throw error;
+        console.error("Error calculating budget estimate:", error);
+        // Return safe default
+        return {
+            venue_cost_aud: 0,
+            catering_cost_aud: 0,
+            total_estimated_aud: 0,
+            budget_total_aud: 0,
+            difference_aud: 0,
+            status: "no_budget",
+            assumptions: []
+        };
     }
 };
 

@@ -48,6 +48,26 @@ export const getBudgetStatus = (
     return totalCost <= targetAmount ? "within_budget" : "over_budget";
 };
 
+// Helper to normalize catering costs
+const normalizeBudgetItems = (items: BudgetItem[], guestCount: number): BudgetItem[] => {
+    return items.map(item => {
+        // Fix Catering Cost if it appears to be a unit price
+        if (item.category.toLowerCase() === 'catering') {
+            // Heuristic: If cost is small (<200) and we have guests, assume it's unit price
+            // This fixes the issue where n8n returns unit price but UI expects total
+            if (item.cost < 200 && guestCount > 0) {
+                return {
+                    ...item,
+                    cost: item.cost * guestCount,
+                    unitPrice: item.cost, // Store original as unit price
+                    quantity: guestCount
+                };
+            }
+        }
+        return item;
+    });
+};
+
 /**
  * Get all budget calculations for a plan
  */
@@ -66,12 +86,16 @@ export const getBudgetCalculations = (plan: EventPlan) => {
         };
     }
 
-    const totalCost = calculateTotalCost(plan.budget.items);
-    const remainingBudget = calculateRemainingBudget(plan.budget.targetAmount, totalCost);
     const guestCount = plan.eventMetadata.guestCount || 0;
+
+    // Normalize items first (Handling Catering multiplication)
+    const processedItems = normalizeBudgetItems(plan.budget.items, guestCount);
+
+    const totalCost = calculateTotalCost(processedItems); // Use processed items
+    const remainingBudget = calculateRemainingBudget(plan.budget.targetAmount, totalCost);
     const perPersonCost = calculatePerPersonCost(totalCost, guestCount);
     const status = getBudgetStatus(plan.budget.targetAmount, totalCost);
-    const itemsWithPercentages = calculateBreakdownPercentages(plan.budget.items);
+    const itemsWithPercentages = calculateBreakdownPercentages(processedItems); // Use processed items
 
     return {
         totalCost,

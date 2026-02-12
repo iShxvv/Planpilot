@@ -72,10 +72,7 @@ function BudgetTrackerDashboard({ currentPlan, onUpdateTarget }: { currentPlan: 
   const isWithinBudget = status === "within_budget";
   const hasNoBudget = status === "no_budget";
 
-  // Get confirmed attendees count (fallback to guestCount)
-  const confirmedAttendees = currentPlan.attendees.filter(
-    (a) => a.rsvpStatus === "confirmed"
-  ).length || guestCount;
+
 
   return (
     <div className={dashboardStyles.dashboard}>
@@ -85,7 +82,7 @@ function BudgetTrackerDashboard({ currentPlan, onUpdateTarget }: { currentPlan: 
         <div className={dashboardStyles.card}>
           <div className={dashboardStyles.cardHeader}>
             <span className={dashboardStyles.cardTitle}>Your Target</span>
-            <button 
+            <button
               className={dashboardStyles.editBtn}
               onClick={() => {
                 setIsEditingTarget(true);
@@ -168,27 +165,27 @@ function BudgetTrackerDashboard({ currentPlan, onUpdateTarget }: { currentPlan: 
                   const previousPercentages = itemsWithPercentages
                     .slice(0, idx)
                     .reduce((sum, prev) => sum + prev.percentage, 0);
-                  
+
                   const startAngle = (previousPercentages / 100) * 360;
                   const endAngle = startAngle + (percentage / 100) * 360;
-                  
+
                   const startRad = (startAngle - 90) * (Math.PI / 180);
                   const endRad = (endAngle - 90) * (Math.PI / 180);
-                  
+
                   const x1 = 100 + 80 * Math.cos(startRad);
                   const y1 = 100 + 80 * Math.sin(startRad);
                   const x2 = 100 + 80 * Math.cos(endRad);
                   const y2 = 100 + 80 * Math.sin(endRad);
-                  
+
                   const largeArc = percentage > 50 ? 1 : 0;
-                  
+
                   const pathData = [
                     `M 100 100`,
                     `L ${x1} ${y1}`,
                     `A 80 80 0 ${largeArc} 1 ${x2} ${y2}`,
                     `Z`
                   ].join(' ');
-                  
+
                   return (
                     <path
                       key={item.id}
@@ -205,13 +202,13 @@ function BudgetTrackerDashboard({ currentPlan, onUpdateTarget }: { currentPlan: 
               {itemsWithPercentages.map((item) => {
                 const percentage = item.percentage.toFixed(0);
                 let displayText = "";
-                
+
                 if (item.priceType === "per_person" && item.unitPrice && item.quantity) {
                   displayText = `${item.name} • ${percentage}% • ${formatCurrency(item.unitPrice, currency)} x ${item.quantity} people = ${formatCurrency(item.cost, currency)}`;
                 } else {
                   displayText = `${item.name} • ${percentage}% • ${formatCurrency(item.cost, currency)}`;
                 }
-                
+
                 return (
                   <div key={item.id} className={dashboardStyles.breakdownItem}>
                     <span className={dashboardStyles.breakdownDot} style={{ color: getCategoryColor(item.category) }}>●</span>
@@ -228,26 +225,43 @@ function BudgetTrackerDashboard({ currentPlan, onUpdateTarget }: { currentPlan: 
 
       {/* Bottom Row - 2 Cards */}
       <div className={dashboardStyles.bottomRow}>
-        {/* Email Responses Card */}
-        <div className={dashboardStyles.card}>
-          <div className={dashboardStyles.cardHeader}>
-            <MiniIcon kind="mail" />
-            <span className={dashboardStyles.cardTitle}>Email Responses</span>
-          </div>
-          <div className={dashboardStyles.statNumber}>{confirmedAttendees}</div>
-          <div className={dashboardStyles.statLabel}>Confirmed Attendees</div>
-        </div>
-
-        {/* Price Per Person Card */}
+        {/* Guest Count Card (Renamed from Email Responses) */}
         <div className={dashboardStyles.card}>
           <div className={dashboardStyles.cardHeader}>
             <MiniIcon kind="user" />
+            <span className={dashboardStyles.cardTitle}>Number of Guests</span>
+          </div>
+          <div className={dashboardStyles.statNumber}>{guestCount}</div>
+          <div className={dashboardStyles.statLabel}>Total Guests</div>
+        </div>
+
+        {/* Price Per Person Card - Shows CATERING price specifically per user request */}
+        <div className={dashboardStyles.card}>
+          <div className={dashboardStyles.cardHeader}>
+            <MiniIcon kind="coin" />
             <span className={dashboardStyles.cardTitle}>Price Per Person</span>
           </div>
           <div className={dashboardStyles.statNumber}>
-            {confirmedAttendees > 0 ? formatCurrency(perPersonCost, currency) : formatCurrency(0, currency)}
+            {(() => {
+              // User Request: Show actual catering price ($35)
+              const cateringItem = currentPlan.budget?.items.find(i => i.category.toLowerCase() === 'catering');
+              if (cateringItem) {
+                // If we have a unit price, use it (best case)
+                if (cateringItem.unitPrice) return formatCurrency(cateringItem.unitPrice, currency);
+                // If cost looks like a unit price (< $200), use cost
+                if (cateringItem.cost < 200) return formatCurrency(cateringItem.cost, currency);
+                // If we have quantity, calc unit price
+                if (cateringItem.quantity && cateringItem.quantity > 0) return formatCurrency(cateringItem.cost / cateringItem.quantity, currency);
+                // Fallback: If cost is high, divide by guest count
+                if (guestCount > 0) return formatCurrency(cateringItem.cost / guestCount, currency);
+              }
+              // Fallback to global per person if no catering found
+              return guestCount > 0 ? formatCurrency(perPersonCost, currency) : formatCurrency(0, currency);
+            })()}
           </div>
-          <div className={dashboardStyles.statLabel}>Per Attendee</div>
+          <div className={dashboardStyles.statLabel}>
+            {currentPlan.budget?.items.some(i => i.category.toLowerCase() === 'catering') ? "Catering (est)" : "Per Attendee"}
+          </div>
         </div>
       </div>
     </div>
@@ -302,42 +316,67 @@ export default function BudgetOverview({
             </div>
           ) : (
             <div className={styles.budgetList}>
-              {plan.budget.items.map((item) => (
-                <div
-                  key={item.id}
-                  className={styles.budgetCard}
-                  style={{ background: getCategoryColor(item.category) }}
-                >
-                  <div className={styles.budgetCategory}>{item.category}</div>
-                  <div className={styles.budgetName}>{item.name}</div>
-                  <div className={styles.budgetPrice}>
-                    {formatCurrency(
-                      item.unitPrice || item.cost,
-                      item.currency
-                    )}{" "}
-                    <span className={styles.budgetPriceType}>
-                      {item.priceType === "per_person"
-                        ? "per person"
-                        : item.priceType === "per_hour"
-                        ? "per hour"
-                        : item.priceType === "per_item"
-                        ? "per item"
-                        : "for hire"}
-                    </span>
-                  </div>
-                  {item.source === "serp_api" && (
-                    <div
-                      style={{
-                        fontSize: "12px",
-                        color: "rgba(255,255,255,0.6)",
-                        marginTop: "4px",
-                      }}
-                    >
-                      Estimated from research
+              {plan.budget.items.map((item) => {
+                // Dynamic check for catering display
+                const isCatering = item.category.toLowerCase() === 'catering';
+                const guestCount = plan.eventMetadata.guestCount || 50;
+
+                // Sync with utils/budgetCalculations logic for consistency
+                let displayCost = item.cost;
+                let displayUnitPrice = item.unitPrice || 0;
+
+                if (isCatering) {
+                  // Heuristic: If cost is small (<200) and we have guests, assume it's unit price
+                  if (item.cost < 200 && guestCount > 0) {
+                    displayUnitPrice = item.cost;
+                    displayCost = item.cost * guestCount;
+                  }
+                }
+
+                return (
+                  <div
+                    key={item.id}
+                    className={styles.budgetCard}
+                    style={{ background: getCategoryColor(item.category) }}
+                  >
+                    <div className={styles.budgetCategory}>{item.category}</div>
+                    <div className={styles.budgetName}>{item.name}</div>
+                    <div className={styles.budgetPrice}>
+                      {formatCurrency(displayCost, item.currency)}
+                      {" "}
+                      <span className={styles.budgetPriceType}>
+                        {isCatering
+                          ? `(for ${guestCount} guests)`
+                          : item.priceType === "per_person"
+                            ? "per person"
+                            : item.priceType === "per_hour"
+                              ? "per hour"
+                              : item.priceType === "per_item"
+                                ? "per item"
+                                : "for hire"}
+                      </span>
                     </div>
-                  )}
-                </div>
-              ))}
+                    {/* Sub-price for catering */}
+                    {(isCatering || item.priceType === 'per_person') && (displayUnitPrice > 0 || item.unitPrice) && (
+                      <div style={{ fontSize: '11px', opacity: 0.8, marginTop: '2px' }}>
+                        @ {formatCurrency(displayUnitPrice > 0 ? displayUnitPrice : item.unitPrice!, item.currency)} pp
+                      </div>
+                    )}
+
+                    {item.source === "serp_api" && (
+                      <div
+                        style={{
+                          fontSize: "12px",
+                          color: "rgba(255,255,255,0.6)",
+                          marginTop: "4px",
+                        }}
+                      >
+                        Estimated from research
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

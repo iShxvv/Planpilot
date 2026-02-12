@@ -2,7 +2,7 @@ import { useState } from "react";
 import {
   EventPlan,
   sendPlanMessage,
-  fetchBudgetEstimate,
+  calculateBudgetEstimate,
   mergeBudgetEstimate,
 } from "../api";
 import { isBudgetQuery, formatCurrency } from "../utils/budgetCalculations";
@@ -30,17 +30,17 @@ export function usePlanChat(
       const isBudgetRelated = isBudgetQuery(message);
 
       if (isBudgetRelated) {
-        // Budget query: Update plan first, then fetch budget
+        // Budget query: Update plan first, then calculate budget
         try {
           setIsBudgetLoading(true);
-          
+
           // Get plan update from event planner
           const response = await sendPlanMessage(message, currentPlan);
           let updatedPlan = response.updatedPlan;
 
-          // Then fetch budget estimate
-          console.log("=== CALLING BUDGET WEBHOOK ===");
-          const budgetEstimate = await fetchBudgetEstimate(updatedPlan, message);
+          // Then calculate budget estimate locally
+          console.log("=== CALCULATING BUDGET ESTIMATE ===");
+          const budgetEstimate = calculateBudgetEstimate(updatedPlan);
 
           console.log("=== BUDGET ESTIMATE RESPONSE ===");
           console.log("Budget estimate:", budgetEstimate);
@@ -55,10 +55,9 @@ export function usePlanChat(
             `• Venue: ${formatCurrency(budgetEstimate.venue_cost_aud, "AUD")}\n` +
             `• Catering: ${formatCurrency(budgetEstimate.catering_cost_aud, "AUD")}\n` +
             `• Total Estimated: ${formatCurrency(budgetEstimate.total_estimated_aud, "AUD")}\n` +
-            `Status: ${
-              budgetEstimate.status === "plausible"
-                ? "Within budget ✓"
-                : budgetEstimate.status === "over_budget"
+            `Status: ${budgetEstimate.status === "plausible"
+              ? "Within budget ✓"
+              : budgetEstimate.status === "over_budget"
                 ? "Over budget ⚠️"
                 : "No budget set"
             }`;
@@ -83,30 +82,24 @@ export function usePlanChat(
         // Regular chat message: Update plan and fetch budget in background
         const response = await sendPlanMessage(message, currentPlan);
         let updatedPlan = response.updatedPlan;
+
+        // --- INSTANT BUDGET UPDATE ---
+        // Calculate budget locally based on the new plan state
+        // Only if we have enough info (guestCount or event type)
+        if (updatedPlan.eventMetadata.guestCount || updatedPlan.eventMetadata.type) {
+          console.log("=== CALCULATING BUDGET ===");
+          const budgetEstimate = calculateBudgetEstimate(updatedPlan);
+          console.log("Budget estimate:", budgetEstimate);
+
+          // Merge budget into the plan
+          updatedPlan = mergeBudgetEstimate(updatedPlan, budgetEstimate);
+        }
+
         onUpdatePlan(updatedPlan);
         setChatMessages((prev) => [
           ...prev,
           { role: "assistant", content: response.userReply },
         ]);
-
-        // Fetch budget estimate in background (don't block the UI)
-        // Only if we have enough info (guestCount or event type)
-        if (updatedPlan.eventMetadata.guestCount || updatedPlan.eventMetadata.type) {
-          console.log("=== FETCHING BACKGROUND BUDGET ===");
-          setIsBudgetLoading(true);
-          fetchBudgetEstimate(updatedPlan, "Estimate costs for this event")
-            .then((budgetEstimate) => {
-              console.log("Background budget estimate:", budgetEstimate);
-              const planWithBudget = mergeBudgetEstimate(updatedPlan, budgetEstimate);
-              onUpdatePlan(planWithBudget);
-            })
-            .catch((err) => {
-              console.log("Background budget fetch failed (non-critical):", err);
-            })
-            .finally(() => {
-              setIsBudgetLoading(false);
-            });
-        }
       }
     } catch (error) {
       console.error("Error:", error);

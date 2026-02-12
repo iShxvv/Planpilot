@@ -82,14 +82,22 @@ export default function PlanOverview({
       item.category.toLowerCase() !== updatedModules[moduleKey].type.toLowerCase() // Check category fallback
     );
 
+    const guestCount = plan.eventMetadata.guestCount || 50;
+    const isCatering = updatedModules[moduleKey].type.toLowerCase() === 'catering';
+
+    // Calculate based on category type
+    const quantity = isCatering ? guestCount : 1;
+    const priceType = isCatering ? 'per_person' : 'fixed';
+    const totalCost = isCatering ? (candidate.priceEstimate * guestCount) : candidate.priceEstimate;
+
     const newBudgetItem: BudgetItem = {
       id: `budget-${moduleKey}`, // Stable ID linked to module
       category: updatedModules[moduleKey].type.charAt(0).toUpperCase() + updatedModules[moduleKey].type.slice(1),
       name: candidate.name,
-      cost: candidate.priceEstimate,
-      unitPrice: candidate.priceEstimate,
-      quantity: 1,
-      priceType: 'fixed',
+      cost: totalCost, // TOTAL cost
+      unitPrice: candidate.priceEstimate, // Unit price
+      quantity: quantity,
+      priceType: priceType,
       status: 'confirmed',
       source: 'user',
       currency: candidate.currency || plan.budget?.currency || 'AUD'
@@ -245,22 +253,40 @@ export default function PlanOverview({
             {plan.modules && Object.entries(plan.modules).map(([key, mod]) => {
               const module = mod as DecisionModule;
               // Visual State: IDLE / SCOUTING
-              if (module.status === 'idle' || module.status === 'scouting') {
+              const isReviewEmpty = module.status === 'review' && (!module.candidates || module.candidates.length === 0);
+
+              const deleteModuleLogic = (e: React.MouseEvent) => {
+                e.stopPropagation();
+                if (window.confirm(`Remove ${module.type} from the plan?`)) {
+                  const updatedModules = { ...plan.modules };
+                  delete updatedModules[key];
+                  onUpdatePlan({ ...plan, modules: updatedModules });
+                }
+              };
+
+              // Restore visibility for empty review state so user can Retry
+              if (module.status === 'idle' || module.status === 'scouting' || isReviewEmpty) {
                 return (
                   <div key={key} className={styles.logisticsCard}>
                     <div className={styles.cardTopRow}>
-                      <span className={styles.categoryTag}>{module.type}</span>
-                      {module.status === 'scouting' && <span className={styles.costTag}>Scouting...</span>}
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <span className={styles.categoryTag}>{module.type}</span>
+                        {module.status === 'scouting' && <span className={styles.costTag}>Scouting...</span>}
+                        {isReviewEmpty && <span className={styles.costTag} style={{ color: '#ef5350' }}>No Matches</span>}
+                      </div>
+                      <button className={styles.deleteBtn} onClick={deleteModuleLogic} title="Remove Service">×</button>
                     </div>
                     <div className={styles.researchState}>
                       <div className={styles.tbdLabel}>
-                        {module.status === 'scouting' ? "AI is researching..." : "Not Details Yet"}
+                        {module.status === 'scouting' ? "AI is researching..." :
+                          isReviewEmpty ? "AI could not find options." : "Not Details Yet"}
                       </div>
                       <button
                         className={styles.actionBtn}
-                        onClick={() => onSendAction(`Find me options for ${module.type} in ${plan.eventMetadata.location?.city}`)}
+                        onClick={() => onSendAction(`Retry research for ${module.type} in ${plan.eventMetadata.location?.city}. Please broaden search terms or suggest top-rated generic options if exact matches are unavailable.`)}
                       >
-                        {module.status === 'scouting' ? "Retry Search" : "Find Options"}
+                        {module.status === 'scouting' ? "Retry Search" :
+                          isReviewEmpty ? "Try Broader Search" : "Find Options"}
                       </button>
                     </div>
                   </div>
@@ -313,6 +339,10 @@ export default function PlanOverview({
 
               // Visual State: BOOKED (Locked in)
               if (module.status === 'booked' && module.selectedChoice) {
+                const isCatering = module.type.toLowerCase() === 'catering';
+                const guestCount = plan.eventMetadata.guestCount || 50;
+                const totalCost = isCatering ? (module.selectedChoice.priceEstimate * guestCount) : module.selectedChoice.priceEstimate;
+
                 return (
                   <div key={key} className={styles.logisticsCard} style={{ borderColor: 'rgba(76, 175, 80, 0.5)', background: 'rgba(76, 175, 80, 0.05)' }}>
                     <div className={styles.cardTopRow}>
@@ -331,7 +361,10 @@ export default function PlanOverview({
                         <div className={styles.vendorNameLarge} style={{ marginTop: 0, fontSize: '16px' }}>{module.selectedChoice.name}</div>
                         <div className={styles.vendorDesc} style={{ marginBottom: '8px', fontSize: '12px' }}>{module.selectedChoice.description}</div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                          <div className={styles.costTag} style={{ color: '#81c784' }}>{module.selectedChoice.currency} {module.selectedChoice.priceEstimate}</div>
+                          <div className={styles.costTag} style={{ color: '#81c784' }}>
+                            {module.selectedChoice.currency || "$"} {totalCost.toLocaleString()}
+                            {isCatering && <span style={{ fontSize: '10px', opacity: 0.7, marginLeft: '4px' }}>(${module.selectedChoice.priceEstimate} pp)</span>}
+                          </div>
                           <div
                             style={{ fontSize: '11px', color: '#aaa', cursor: 'pointer', textDecoration: 'underline' }}
                             onClick={() => handleResetModule(key)}

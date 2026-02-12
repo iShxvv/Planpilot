@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import styles from "./PlanPage.module.css";
 import PlanPageBg from "../assets/images/theme_Background.png";
 
@@ -39,10 +39,27 @@ export default function PlanPage() {
     addLogMessage,
   } = usePlanChat(currentPlan, handleUpdatePlan);
 
+  const { id } = useParams<{ id: string }>();
+  const location = useLocation();
+  const initializedRef = useRef(false);
+
   useEffect(() => {
-    const storedPlan = loadPlanFromStorage();
-    if (storedPlan) {
-      setCurrentPlan(storedPlan);
+    if (!id) return;
+
+    // Load plan by ID
+    let storedPlan = loadPlanFromStorage(id);
+
+    if (!storedPlan) {
+      // If not found, create a new one with this ID (assuming valid flow from FormPage)
+      storedPlan = createEmptyPlan();
+      storedPlan.planId = id;
+      savePlanToStorage(storedPlan);
+    }
+
+    setCurrentPlan(storedPlan);
+
+    // Restore chat history
+    if (storedPlan.aiContext?.conversationHistory) {
       const chatHistory: ChatMessage[] = storedPlan.aiContext.conversationHistory.map(
         (msg) => ({
           role: msg.role as "user" | "assistant",
@@ -51,20 +68,35 @@ export default function PlanPage() {
       );
       setChatMessages(chatHistory);
     }
-  }, [setChatMessages]);
+  }, [id, setChatMessages]);
 
-  // Check for initial message from FormPage
+  // Handle initial message from FormPage
   useEffect(() => {
-    const initialMsg = localStorage.getItem("planpilot_initial_message");
-    if (initialMsg) {
-      localStorage.removeItem("planpilot_initial_message");
-      // Use setTimeout to ensure state is initialized
-      setTimeout(() => {
-        sendMessage(initialMsg);
-      }, 100);
+    // Only run if we have a plan loaded with the correct ID
+    if (currentPlan.planId === id && !initializedRef.current) {
+      const initialPrompt = location.state?.initialPrompt;
+
+      // Also check legacy localStorage for backward compat or if state was lost
+      const legacyPrompt = localStorage.getItem("planpilot_initial_message");
+
+      const promptToRun = initialPrompt || legacyPrompt;
+
+      if (promptToRun) {
+        initializedRef.current = true;
+
+        // Clear legacy
+        if (legacyPrompt) localStorage.removeItem("planpilot_initial_message");
+
+        // Clear state (replace history so back button doesn't re-trigger)
+        navigate(location.pathname, { replace: true, state: {} });
+
+        // Send message
+        setTimeout(() => {
+          sendMessage(promptToRun);
+        }, 100);
+      }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Intentionally empty to run once on mount
+  }, [currentPlan, id, location.state, navigate, sendMessage]);
 
   return (
     <div
@@ -79,9 +111,8 @@ export default function PlanPage() {
       />
 
       <main
-        className={`${styles.shell} ${
-          activeTab === "budget" ? styles.shellThreeCol : ""
-        }`}
+        className={`${styles.shell} ${activeTab === "budget" ? styles.shellThreeCol : ""
+          }`}
       >
         <AssistantPanel
           chatMessages={chatMessages}
@@ -90,8 +121,8 @@ export default function PlanPage() {
         />
 
         {activeTab === "plan" && (
-          <PlanOverview 
-            plan={currentPlan} 
+          <PlanOverview
+            plan={currentPlan}
             onSendAction={sendMessage}
             onUpdatePlan={handleUpdatePlan}
             isLoading={isLoading && !currentPlan.eventMetadata?.title}
@@ -114,8 +145,8 @@ export default function PlanPage() {
         )}
 
         {activeTab === "budget" && (
-          <BudgetOverview 
-            plan={currentPlan} 
+          <BudgetOverview
+            plan={currentPlan}
             onUpdatePlan={handleUpdatePlan}
             isLoading={isBudgetLoading}
           />

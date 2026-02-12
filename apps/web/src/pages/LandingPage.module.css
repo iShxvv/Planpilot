@@ -8,7 +8,7 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
-  
+
   /* Single background image for entire page */
   background: #36293D;
   background-size: cover;
@@ -262,6 +262,7 @@
 
 /* Responsive */
 @media (max-width: 700px) {
+
   .navLeft,
   .navRight {
     font-size: 16px;
@@ -307,4 +308,86 @@
 
 .supportSection {
   background: rgba(45, 34, 53, 0.85);
+}
+
+/* New styles for saved plans list in Hero */
+.heroActions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 24px;
+  width: 100%;
+}
+
+.savedPlansContainer {
+  margin-top: 12px;
+  padding: 16px;
+  background: rgba(89, 68, 100, 0.4);
+  border-radius: 12px;
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(228, 181, 255, 0.2);
+  width: 100%;
+  max-width: 400px;
+  animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.savedPlansLabel {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0 0 12px 0;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-family: 'Afacad Flux', sans-serif;
+}
+
+.savedPlansList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.savedPlanCard {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 8px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border: 1px solid transparent;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.savedPlanCard:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(228, 181, 255, 0.4);
+  transform: translateX(4px);
+}
+
+.savedPlanTitle {
+  font-family: 'Afacad Flux', sans-serif;
+  font-weight: 500;
+  color: #E4B5FF;
+  font-size: 18px;
+  margin-bottom: 4px;
+  line-height: 1.2;
+}
+
+.savedPlanMeta {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  font-family: 'Afacad Flux', sans-serif;
 }

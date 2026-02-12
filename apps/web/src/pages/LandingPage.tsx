@@ -1,10 +1,16 @@
-// Landing.tsx
+import { useState, useEffect } from "react";
 import styles from "./LandingPage.module.css";
 import { useNavigate } from "react-router-dom";
 import LandingPageBg from "../assets/images/LandingPage_Background.png";
+import { getAllPlans, PlanSummary } from "../api";
 
 export default function LandingPage() {
   const navigate = useNavigate();
+  const [savedPlans, setSavedPlans] = useState<PlanSummary[]>([]);
+
+  useEffect(() => {
+    setSavedPlans(getAllPlans());
+  }, []);
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -40,11 +46,34 @@ export default function LandingPage() {
         <main className={styles.hero}>
           <h1 className={styles.title}>PlanPilot</h1>
           <p className={styles.subtitle}>We take the guesswork out of your events</p>
-          <button
-            className={styles.cta}
-            onClick={() => navigate("/form")}>
-            Get Started
-          </button>
+
+          {savedPlans.length > 0 ? (
+            <div className={styles.heroActions}>
+              <button
+                className={styles.cta}
+                onClick={() => navigate("/form")}>
+                + New Event
+              </button>
+
+              <div className={styles.savedPlansContainer}>
+                <p className={styles.savedPlansLabel}>Continue Planning:</p>
+                <div className={styles.savedPlansList}>
+                  {savedPlans.slice(0, 3).map(plan => (
+                    <div key={plan.id} className={styles.savedPlanCard} onClick={() => navigate(`/plan/${plan.id}`)}>
+                      <div className={styles.savedPlanTitle}>{plan.title}</div>
+                      <div className={styles.savedPlanMeta}>Edited {new Date(plan.lastUpdated).toLocaleDateString()}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          ) : (
+            <button
+              className={styles.cta}
+              onClick={() => navigate("/form")}>
+              Get Started
+            </button>
+          )}
         </main>
       </section>
 

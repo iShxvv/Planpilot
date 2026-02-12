@@ -14,42 +14,42 @@ export interface EventPlan {
     notes: NoteItem[];
     budget: BudgetData;
     aiContext: AIContext;
-    
+
     // NEW: Decision Modules for the Smart Dashboard
     modules: Record<string, DecisionModule>;
 }
 
 export interface DecisionModule {
-  id: string; // e.g., "mod-venue"
-  type: string; // "venue" | "catering" | "entertainment"
-  status: "idle" | "scouting" | "review" | "booked";
-  
-  // What we are looking for
-  requirements: {
-    description: string;
-    minBudget?: number;
-    maxBudget?: number;
-  };
+    id: string; // e.g., "mod-venue"
+    type: string; // "venue" | "catering" | "entertainment"
+    status: "idle" | "scouting" | "review" | "booked";
 
-  // The AI's findings
-  candidates: Candidate[];
-  
-  // The User's Choice
-  selectedChoice: Candidate | null;
+    // What we are looking for
+    requirements: {
+        description: string;
+        minBudget?: number;
+        maxBudget?: number;
+    };
+
+    // The AI's findings
+    candidates: Candidate[];
+
+    // The User's Choice
+    selectedChoice: Candidate | null;
 }
 
 export interface Candidate {
-  id: string;
-  name: string;
-  description: string;
-  priceEstimate: number;
-  currency: string;
-  rating?: number;
-  pros: string[];
-  cons: string[];
-  imageUrl?: string;
-  website?: string;
-  location?: string;
+    id: string;
+    name: string;
+    description: string;
+    priceEstimate: number;
+    currency: string;
+    rating?: number;
+    pros: string[];
+    cons: string[];
+    imageUrl?: string;
+    website?: string;
+    location?: string;
 }
 
 export interface EventMetadata {
@@ -177,12 +177,12 @@ export interface EventPlannerResponse {
 // ===== Helper Functions =====
 
 export const createEmptyModule = (type: string): DecisionModule => ({
-  id: `mod-${type}-${Date.now()}`,
-  type,
-  status: "idle",
-  requirements: { description: "" },
-  candidates: [],
-  selectedChoice: null,
+    id: `mod-${type}-${Date.now()}`,
+    type,
+    status: "idle",
+    requirements: { description: "" },
+    candidates: [],
+    selectedChoice: null,
 });
 
 export const createEmptyPlan = (): EventPlan => ({
@@ -291,6 +291,11 @@ export const sendPlanMessage = async (
         // Normalize the plan to ensure all required fields exist
         const normalizedPlan = normalizePlan(data.updatedPlan);
 
+        // CRITICAL: Preserve the plan ID if not returned by n8n
+        if (!normalizedPlan.planId && planToSend.planId) {
+            normalizedPlan.planId = planToSend.planId;
+        }
+
         return {
             updatedPlan: normalizedPlan,
             userReply: data.userReply,
@@ -307,37 +312,103 @@ export const sendPlanMessage = async (
 
 // ===== Local Storage Helpers =====
 
-const STORAGE_KEY = "planpilot_current_plan";
+const STORAGE_KEY = "planpilot_plans_db";
 
+
+export interface PlanSummary {
+    id: string;
+    title: string;
+    lastUpdated: string;
+    status: string;
+}
+
+/**
+ * Save a plan to the multi-plan storage
+ */
 export const savePlanToStorage = (plan: EventPlan): void => {
     try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(plan));
+        if (!plan.planId) {
+            console.error("Cannot save plan without an ID");
+            return;
+        }
+
+        const allPlans = loadAllPlansRaw();
+        allPlans[plan.planId] = plan;
+
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(allPlans));
     } catch (error) {
         console.error("Error saving plan to localStorage:", error);
     }
 };
 
-export const loadPlanFromStorage = (): EventPlan | null => {
+/**
+ * Load a specific plan by ID
+ */
+export const loadPlanFromStorage = (planId?: string): EventPlan | null => {
+
+
     try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-            const plan = JSON.parse(stored);
-            
-            // Normalize the plan to ensure all required fields exist
-            return normalizePlan(plan);
+        const allPlans = loadAllPlansRaw();
+
+        if (planId && allPlans[planId]) {
+            return normalizePlan(allPlans[planId]);
         }
+
+        // precise fallback logic: if no planId, maybe return the most recent one?
+        // For now, let's return null if no ID is specific, forcing the user to pick one or create one.
+        return null;
     } catch (error) {
         console.error("Error loading plan from localStorage:", error);
+        return null;
     }
-    return null;
 };
 
-export const clearPlanFromStorage = (): void => {
+/**
+ * Get all plans for the landing page list
+ */
+export const getAllPlans = (): PlanSummary[] => {
+
+    const allPlans = loadAllPlansRaw();
+
+    return Object.values(allPlans)
+        .map(plan => ({
+            id: plan.planId!,
+            title: plan.eventMetadata.title || "Untitled Event",
+            lastUpdated: plan.lastUpdated || new Date().toISOString(),
+            status: plan.eventMetadata.status || "draft"
+        }))
+        .sort((a, b) => new Date(b.lastUpdated).getTime() - new Date(a.lastUpdated).getTime());
+};
+
+/**
+ * Delete a plan
+ */
+export const deletePlan = (planId: string): void => {
     try {
-        localStorage.removeItem(STORAGE_KEY);
+        const allPlans = loadAllPlansRaw();
+        delete allPlans[planId];
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(allPlans));
     } catch (error) {
-        console.error("Error clearing plan from localStorage:", error);
+        console.error("Error deleting plan:", error);
     }
+};
+
+// --- Internal Helpers ---
+
+function loadAllPlansRaw(): Record<string, EventPlan> {
+    try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        return stored ? JSON.parse(stored) : {};
+    } catch {
+        return {};
+    }
+}
+
+
+
+export const clearPlanFromStorage = (): void => {
+    // Legacy support - maybe clear everything? Or specific?
+    // For safety, let's not implement a global clear right now via this method.
 };
 
 // ===== Budget Estimation API =====
@@ -363,11 +434,11 @@ export const fetchBudgetEstimate = async (
     userMessage: string = "What's my budget?"
 ): Promise<BudgetEstimateResponse> => {
     try {
-        const N8N_BUDGET_WEBHOOK = import.meta.env.VITE_N8N_BUDGET_WEBHOOK_URL || 
+        const N8N_BUDGET_WEBHOOK = import.meta.env.VITE_N8N_BUDGET_WEBHOOK_URL ||
             "https://shxvv.app.n8n.cloud/webhook/adcf1994-1aa7-4df9-af86-7afe7dc05459";
 
         console.log("Fetching budget estimate from n8n:", N8N_BUDGET_WEBHOOK);
-        
+
         // Transform plan to match n8n expected format
         // n8n expects: plan.eventMetadata.budget.total
         // We have: plan.budget.targetAmount
@@ -380,7 +451,7 @@ export const fetchBudgetEstimate = async (
                 }
             }
         };
-        
+
         console.log("Sending transformed plan:", transformedPlan);
         console.log("User message:", userMessage);
 
@@ -389,9 +460,9 @@ export const fetchBudgetEstimate = async (
             headers: {
                 "Content-Type": "application/json",
             },
-            body: JSON.stringify({ 
+            body: JSON.stringify({
                 user_message: userMessage,
-                plan: transformedPlan 
+                plan: transformedPlan
             }),
         });
 
@@ -478,8 +549,8 @@ export const mergeBudgetEstimate = (
     }
 
     // Update target amount if provided in the estimate
-    const targetAmount = estimate.budget_total_aud !== null 
-        ? estimate.budget_total_aud 
+    const targetAmount = estimate.budget_total_aud !== null
+        ? estimate.budget_total_aud
         : plan.budget.targetAmount;
 
     return {

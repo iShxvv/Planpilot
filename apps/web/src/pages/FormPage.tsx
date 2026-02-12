@@ -10,9 +10,11 @@ export default function FormPage() {
     const handleNext = () => {
         if (!prompt.trim()) return;
 
-        // Save prompt to localStorage so PlanPage can pick it up
-        localStorage.setItem('planpilot_initial_message', prompt);
-        navigate('/plan');
+        // Generate a new ID for the plan
+        const newPlanId = crypto.randomUUID ? crypto.randomUUID() : `plan-${Date.now()}`;
+
+        // Navigate to the new plan URL with the prompt in state
+        navigate(`/plan/${newPlanId}`, { state: { initialPrompt: prompt } });
     };
 
     const handleKeyDown = (e: React.KeyboardEvent) => {

@@ -9,7 +9,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/form" element={<FormPage />} />
-        <Route path="/plan" element={<PlanPage />} />
+        <Route path="/plan/:id" element={<PlanPage />} />
       </Routes>
     </Router>
   );

@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LandingPage from "./pages/LandingPage.tsx";
-import FormPage from "./pages/FormPage.tsx";
 import PlanPage from "./pages/PlanPage.tsx";
 
 export default function App() {
@@ -8,7 +7,6 @@ export default function App() {
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
-        <Route path="/form" element={<FormPage />} />
         <Route path="/plan" element={<PlanPage />} />
       </Routes>
     </Router>

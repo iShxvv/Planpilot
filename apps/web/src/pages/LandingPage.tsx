@@ -40,9 +40,9 @@ export default function LandingPage() {
         <main className={styles.hero}>
           <h1 className={styles.title}>PlanPilot</h1>
           <p className={styles.subtitle}>We take the guesswork out of your events</p>
-          <button 
-            className={styles.cta} 
-            onClick={() => navigate("/form")}>
+          <button
+            className={styles.cta}
+            onClick={() => navigate("/plan")}>
             Get Started
           </button>
         </main>
@@ -53,11 +53,11 @@ export default function LandingPage() {
         <div className={styles.sectionContent}>
           <h2 className={styles.sectionTitle}>About PlanPilot</h2>
           <p className={styles.sectionText}>
-            PlanPilot is your intelligent event planning assistant. We use AI to help you create 
+            PlanPilot is your intelligent event planning assistant. We use AI to help you create
             memorable events without the stress. From weddings to corporate gatherings, we've got you covered.
           </p>
           <p className={styles.sectionText}>
-            Our platform streamlines the entire planning process, suggesting venues, activities, and 
+            Our platform streamlines the entire planning process, suggesting venues, activities, and
             timelines tailored to your specific needs and budget.
           </p>
         </div>

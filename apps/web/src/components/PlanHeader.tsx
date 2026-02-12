@@ -29,7 +29,7 @@ export default function PlanHeader({
         <div className={styles.topPill}>
           <div className={styles.dropdown}>
             <span className={styles.dropdownText}>
-              {plan.eventMetadata?.type || "New Event"}
+              {plan.eventMetadata?.title || plan.eventMetadata?.type || "New Event"}
             </span>
           </div>
           <div className={styles.sliderGroup}>

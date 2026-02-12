@@ -6,3 +6,5 @@ node_modules/
 # Build
 dist/
 
+# Documentation
+docs

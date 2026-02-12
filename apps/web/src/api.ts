@@ -14,6 +14,42 @@ export interface EventPlan {
     notes: NoteItem[];
     budget: BudgetData;
     aiContext: AIContext;
+    
+    // NEW: Decision Modules for the Smart Dashboard
+    modules: Record<string, DecisionModule>;
+}
+
+export interface DecisionModule {
+  id: string; // e.g., "mod-venue"
+  type: string; // "venue" | "catering" | "entertainment"
+  status: "idle" | "scouting" | "review" | "booked";
+  
+  // What we are looking for
+  requirements: {
+    description: string;
+    minBudget?: number;
+    maxBudget?: number;
+  };
+
+  // The AI's findings
+  candidates: Candidate[];
+  
+  // The User's Choice
+  selectedChoice: Candidate | null;
+}
+
+export interface Candidate {
+  id: string;
+  name: string;
+  description: string;
+  priceEstimate: number;
+  currency: string;
+  rating?: number;
+  pros: string[];
+  cons: string[];
+  imageUrl?: string;
+  website?: string;
+  location?: string;
 }
 
 export interface EventMetadata {
@@ -138,6 +174,17 @@ export interface EventPlannerResponse {
 
 // ===== Empty Plan Template =====
 
+// ===== Helper Functions =====
+
+export const createEmptyModule = (type: string): DecisionModule => ({
+  id: `mod-${type}-${Date.now()}`,
+  type,
+  status: "idle",
+  requirements: { description: "" },
+  candidates: [],
+  selectedChoice: null,
+});
+
 export const createEmptyPlan = (): EventPlan => ({
     planId: null,
     version: 0,
@@ -157,6 +204,11 @@ export const createEmptyPlan = (): EventPlan => ({
         lastUserRequest: undefined,
         pendingActions: [],
     },
+    modules: {
+        venue: createEmptyModule("venue"),
+        catering: createEmptyModule("catering"),
+        entertainment: createEmptyModule("entertainment"),
+    }
 });
 
 /**
@@ -165,22 +217,16 @@ export const createEmptyPlan = (): EventPlan => ({
  * @returns Normalized plan with all required fields
  */
 export const normalizePlan = (plan: any): EventPlan => {
+    const empty = createEmptyPlan();
     return {
+        ...empty,
         ...plan,
-        attendees: Array.isArray(plan.attendees) ? plan.attendees : [],
-        budget: plan.budget || {
-            targetAmount: 10000,
-            currency: "AUD",
-            items: [],
-        },
-        schedule: Array.isArray(plan.schedule) ? plan.schedule : [],
-        vendors: Array.isArray(plan.vendors) ? plan.vendors : [],
-        notes: Array.isArray(plan.notes) ? plan.notes : [],
-        aiContext: plan.aiContext || {
-            conversationHistory: [],
-            lastUserRequest: undefined,
-            pendingActions: [],
-        },
+        // Ensure complex nested objects exist
+        eventMetadata: { ...empty.eventMetadata, ...plan.eventMetadata },
+        budget: { ...empty.budget, ...plan.budget },
+        aiContext: { ...empty.aiContext, ...plan.aiContext },
+        // Critical: Ensure modules exist
+        modules: plan.modules || empty.modules
     };
 };
 

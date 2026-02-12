@@ -41,7 +41,7 @@ export default function PlanPage() {
 
   useEffect(() => {
     const storedPlan = loadPlanFromStorage();
-    if (storedPlan && storedPlan.version > 0) {
+    if (storedPlan) {
       setCurrentPlan(storedPlan);
       const chatHistory: ChatMessage[] = storedPlan.aiContext.conversationHistory.map(
         (msg) => ({
@@ -89,7 +89,14 @@ export default function PlanPage() {
           onSendMessage={sendMessage}
         />
 
-        {activeTab === "plan" && <PlanOverview plan={currentPlan} />}
+        {activeTab === "plan" && (
+          <PlanOverview 
+            plan={currentPlan} 
+            onSendAction={sendMessage}
+            onUpdatePlan={handleUpdatePlan}
+            isLoading={isLoading && !currentPlan.eventMetadata?.title}
+          />
+        )}
 
         {activeTab === "attendees" && (
           <AttendeesManager

@@ -963,387 +963,391 @@
 /* ===== COMMAND CENTER (NEW) ===== */
 
 .commandCenter {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    gap: 16px;
-    padding: 10px;
-    overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 16px;
+  padding: 10px;
+  overflow: hidden;
 }
 
 .heroSection {
-    background: rgba(89, 68, 100, 0.4);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 18px;
-    padding: 24px;
-    flex-shrink: 0;
+  background: rgba(89, 68, 100, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 18px;
+  padding: 24px;
+  flex-shrink: 0;
 }
 
 .heroContent {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .heroTitleInput {
-    background: transparent;
-    border: none;
-    font-size: 32px;
-    font-weight: 700;
-    color: white;
-    outline: none;
-    width: 100%;
+  background: transparent;
+  border: none;
+  font-size: 32px;
+  font-weight: 700;
+  color: white;
+  outline: none;
+  width: 100%;
 }
 
 .heroTitleInput::placeholder {
-    color: rgba(255,255,255,0.3);
+  color: rgba(255, 255, 255, 0.3);
 }
 
 .heroDescInput {
-    background: transparent;
-    border: none;
-    font-size: 18px;
-    color: rgba(255,255,255,0.8);
-    outline: none;
-    width: 100%;
-    resize: none;
-    font-family: inherit;
-    overflow: hidden;
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  color: rgba(255, 255, 255, 0.8);
+  outline: none;
+  width: 100%;
+  resize: none;
+  font-family: inherit;
+  overflow: hidden;
 }
 
 .heroStatsRow {
-    display: flex;
-    gap: 12px;
-    margin-top: 8px;
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
 }
 
 .statPill {
-    background: rgba(0,0,0,0.2);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 10px;
-    padding: 6px 12px;
-    display: flex;
-    flex-direction: column;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 6px 12px;
+  display: flex;
+  flex-direction: column;
 }
 
 .statLabel {
-    font-size: 10px;
-    text-transform: uppercase;
-    color: rgba(255,255,255,0.5);
-    font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 700;
 }
 
 .statInput {
-    background: transparent;
-    border: none;
-    color: white;
-    font-size: 14px;
-    font-weight: 600;
-    outline: none;
-    width: 120px;
+  background: transparent;
+  border: none;
+  color: white;
+  font-size: 14px;
+  font-weight: 600;
+  outline: none;
+  width: 120px;
 }
 
 .mainGrid {
-    display: grid;
-    grid-template-columns: 1fr 400px;
-    gap: 16px;
-    flex: 1;
-    min-height: 0;
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
 }
 
-.timelineColumn, .logisticsColumn {
-    background: rgba(26, 14, 36, 0.4);
-    border-radius: 18px;
-    border: 1px solid rgba(255, 255, 255, 0.05);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+.timelineColumn,
+.logisticsColumn {
+  background: rgba(26, 14, 36, 0.4);
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .columnHeader {
-    padding: 16px;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .columnHeader h3 {
-    margin: 0;
-    font-size: 16px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: rgba(255,255,255,0.7);
+  margin: 0;
+  font-size: 16px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: rgba(255, 255, 255, 0.7);
 }
 
 .iconBtn {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.1);
-    background: rgba(255,255,255,0.05);
-    color: white;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
 }
 
 .iconBtn:hover {
-    background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* TIMELINE */
 .timelineContainer {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .timelineRow {
-    display: flex;
-    gap: 12px;
-    padding: 8px;
-    border-radius: 8px;
-    transition: background 0.1s;
+  display: flex;
+  gap: 12px;
+  padding: 8px;
+  border-radius: 8px;
+  transition: background 0.1s;
 }
 
 .timelineRow:hover {
-    background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .timeWrapper {
-    width: 70px;
-    flex-shrink: 0;
+  width: 70px;
+  flex-shrink: 0;
 }
 
 .timeInput {
-    background: rgba(0,0,0,0.2);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 6px;
-    color: #E4B5FF;
-    font-weight: 600;
-    padding: 6px;
-    width: 100%;
-    text-align: center;
-    font-size: 13px;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 6px;
+  color: #E4B5FF;
+  font-weight: 600;
+  padding: 6px;
+  width: 100%;
+  text-align: center;
+  font-size: 13px;
 }
 
 .timelineContent {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .activityInput {
-    background: transparent;
-    border: none;
-    color: white;
-    font-weight: 500;
-    font-size: 15px;
-    width: 100%;
-    outline: none;
+  background: transparent;
+  border: none;
+  color: white;
+  font-weight: 500;
+  font-size: 15px;
+  width: 100%;
+  outline: none;
 }
 
 .notesInput {
-    background: transparent;
-    border: none;
-    color: rgba(255,255,255,0.6);
-    font-size: 13px;
-    width: 100%;
-    outline: none;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 13px;
+  width: 100%;
+  outline: none;
 }
 
 .deleteBtn {
-    opacity: 0;
-    background: transparent;
-    border: none;
-    color: rgba(255,255,255,0.3);
-    cursor: pointer;
-    font-size: 18px;
+  opacity: 0;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.3);
+  cursor: pointer;
+  font-size: 18px;
 }
 
 .timelineRow:hover .deleteBtn {
-    opacity: 1;
+  opacity: 1;
 }
 
 .emptyStateSimple {
-    border: 1px dashed rgba(255,255,255,0.1);
-    border-radius: 8px;
-    padding: 12px;
-    text-align: center;
-    color: rgba(255,255,255,0.4);
-    cursor: pointer;
-    font-size: 13px;
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.4);
+  cursor: pointer;
+  font-size: 13px;
 }
 
 .emptyStateSimple:hover {
-    background: rgba(255,255,255,0.02);
-    color: rgba(255,255,255,0.6);
+  background: rgba(255, 255, 255, 0.02);
+  color: rgba(255, 255, 255, 0.6);
 }
 
 /* LOGISTICS */
 .vendorsList {
-    flex: 1;
-    overflow-y: auto;
-    padding: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .logisticsCard {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 12px;
-    padding: 16px;
-    transition: all 0.2s;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 16px;
+  transition: all 0.2s;
 }
 
 .cardTopRow {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 12px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
 }
 
 .categoryTag {
-    font-size: 11px;
-    text-transform: uppercase;
-    font-weight: 700;
-    color: rgba(255,255,255,0.4);
-    background: rgba(255,255,255,0.05);
-    padding: 4px 8px;
-    border-radius: 6px;
+  font-size: 11px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 4px 8px;
+  border-radius: 6px;
 }
 
 .costTag {
-    font-size: 12px;
-    color: #E4B5FF;
-    font-weight: 600;
+  font-size: 12px;
+  color: #E4B5FF;
+  font-weight: 600;
 }
 
 .researchState {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    align-items: center;
-    padding: 10px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
 }
 
 .tbdLabel {
-    color: rgba(255,255,255,0.3);
-    font-style: italic;
-    font-size: 13px;
+  color: rgba(255, 255, 255, 0.3);
+  font-style: italic;
+  font-size: 13px;
 }
 
 .actionBtn {
-    background: #E4B5FF;
-    color: #1a0e24;
-    border: none;
-    padding: 8px 16px;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 13px;
-    cursor: pointer;
-    transition: transform 0.1s;
+  background: #E4B5FF;
+  color: #1a0e24;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 13px;
+  cursor: pointer;
+  transition: transform 0.1s;
 }
 
 .actionBtn:hover {
-    transform: translateY(-1px);
-    filter: brightness(1.1);
+  transform: translateY(-1px);
+  filter: brightness(1.1);
 }
 
 .actionBtn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    transform: none;
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .suggestionsDrawer {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .miniSuggestion {
-    background: rgba(0,0,0,0.2);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 8px;
-    padding: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    cursor: pointer;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
 }
 
 .miniSuggestion:hover {
-    background: rgba(255,255,255,0.05);
-    border-color: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .miniSugName {
-    font-weight: 600;
-    font-size: 14px;
-    color: white;
+  font-weight: 600;
+  font-size: 14px;
+  color: white;
 }
 
 .miniSugPrice {
-    font-size: 12px;
-    color: #E4B5FF;
+  font-size: 12px;
+  color: #E4B5FF;
 }
 
 .miniSugSelect {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    background: rgba(255,255,255,0.1); 
-    padding: 4px 8px;
-    border-radius: 4px;
-    opacity: 0;
-    transition: opacity 0.2s;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 4px;
+  opacity: 0;
+  transition: opacity 0.2s;
 }
 
 .miniSuggestion:hover .miniSugSelect {
-    opacity: 1;
+  opacity: 1;
 }
 
 .confirmedState {
-    text-align: left;
+  text-align: left;
 }
 
 .vendorNameLarge {
-    font-size: 18px;
-    font-weight: 600;
-    color: white;
-    margin-bottom: 4px;
+  font-size: 18px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 4px;
 }
 
 /* Rich Candidate Card (Compact Horizontal) */
 .richCandidate {
-  background: rgba(0,0,0,0.3);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 10px;
   overflow: hidden;
   margin-bottom: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
-  display: flex; /* Horizontal layout */
-  height: 100px; /* Fixed height container */
+  display: flex;
+  /* Horizontal layout */
+  height: 100px;
+  /* Fixed height container */
 }
 
 .richCandidate:hover {
   border-color: #E4B5FF;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .richImage {
-  width: 100px; /* Square image on left */
+  width: 100px;
+  /* Square image on left */
   height: 100%;
   object-fit: cover;
   background: #2a1b30;
@@ -1352,11 +1356,13 @@
 
 .richContent {
   padding: 10px 14px;
-  flex: 1; /* Take remaining width */
+  flex: 1;
+  /* Take remaining width */
   display: flex;
   flex-direction: column;
   justify-content: center;
-  min-width: 0; /* Allow text truncation */
+  min-width: 0;
+  /* Allow text truncation */
   position: relative;
 }
 
@@ -1386,10 +1392,11 @@
 
 .richDesc {
   font-size: 12px;
-  color: rgba(255,255,255,0.7);
+  color: rgba(255, 255, 255, 0.7);
   line-height: 1.3;
   display: -webkit-box;
-  -webkit-line-clamp: 2; /* Limit to 2 lines */
+  -webkit-line-clamp: 2;
+  /* Limit to 2 lines */
   -webkit-box-orient: vertical;
   overflow: hidden;
   margin-bottom: 0;
@@ -1406,7 +1413,8 @@
   background: rgba(228, 181, 255, 0.1);
   padding: 2px 6px;
   border-radius: 4px;
-  opacity: 0; /* Hidden by default */
+  opacity: 0;
+  /* Hidden by default */
   transition: opacity 0.2s;
 }
 
@@ -1434,7 +1442,9 @@
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .loadingText {
@@ -1445,3 +1455,27 @@
   font-size: 14px;
 }
 
+
+/* Small Action Button */
+.actionBtnSmall {
+  background: rgba(228, 181, 255, 0.15);
+  border: 1px solid rgba(228, 181, 255, 0.25);
+  color: #E4B5FF;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.actionBtnSmall:hover {
+  background: rgba(228, 181, 255, 0.25);
+  transform: translateY(-1px);
+}
+
+.actionBtnSmall:active {
+  transform: translateY(0);
+}

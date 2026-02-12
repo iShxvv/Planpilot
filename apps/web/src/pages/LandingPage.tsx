@@ -2,15 +2,27 @@ import { useState, useEffect } from "react";
 import styles from "./LandingPage.module.css";
 import { useNavigate } from "react-router-dom";
 import LandingPageBg from "../assets/images/LandingPage_Background.png";
-import { getAllPlans, PlanSummary } from "../api";
+import { getAllPlans, PlanSummary, deletePlan } from "../api";
 
 export default function LandingPage() {
   const navigate = useNavigate();
   const [savedPlans, setSavedPlans] = useState<PlanSummary[]>([]);
 
   useEffect(() => {
-    setSavedPlans(getAllPlans());
+    loadPlans();
   }, []);
+
+  const loadPlans = () => {
+    setSavedPlans(getAllPlans());
+  };
+
+  const handleDeletePlan = (e: React.MouseEvent, planId: string) => {
+    e.stopPropagation();
+    if (window.confirm("Are you sure you want to delete this plan? This action cannot be undone.")) {
+      deletePlan(planId);
+      loadPlans();
+    }
+  };
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -60,8 +72,17 @@ export default function LandingPage() {
                 <div className={styles.savedPlansList}>
                   {savedPlans.slice(0, 3).map(plan => (
                     <div key={plan.id} className={styles.savedPlanCard} onClick={() => navigate(`/plan/${plan.id}`)}>
-                      <div className={styles.savedPlanTitle}>{plan.title}</div>
-                      <div className={styles.savedPlanMeta}>Edited {new Date(plan.lastUpdated).toLocaleDateString()}</div>
+                      <div className={styles.planCardContent}>
+                        <div className={styles.savedPlanTitle}>{plan.title}</div>
+                        <div className={styles.savedPlanMeta}>Edited {new Date(plan.lastUpdated).toLocaleDateString()}</div>
+                      </div>
+                      <button
+                        className={styles.deletePlanBtn}
+                        onClick={(e) => handleDeletePlan(e, plan.id)}
+                        title="Delete Plan"
+                      >
+                        <span className="material-symbols-rounded">delete</span>
+                      </button>
                     </div>
                   ))}
                 </div>

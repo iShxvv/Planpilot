@@ -1,0 +1,167 @@
+/* FormPage.module.css */
+
+.page {
+    min-height: 100vh;
+    height: 100vh;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    color: rgba(255, 255, 255, 0.92);
+    display: flex;
+    flex-direction: column;
+    padding: 14px;
+    box-sizing: border-box;
+    font-family: ui-sans-serif, system-ui, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+/* Header */
+.topBar {
+    height: 64px;
+    background: #594464;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 24px;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    margin-bottom: 40px;
+}
+
+.headerTitle {
+    font-size: 20px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.topRight {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.brand {
+    font-size: 24px;
+    opacity: 0.9;
+    font-weight: 300;
+}
+
+.homeBtn {
+    width: 40px;
+    height: 40px;
+    border-radius: 12px;
+    background: rgba(20, 12, 26, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    transition: background 150ms ease;
+    font-size: 24px;
+}
+
+.homeBtn:hover {
+    background: rgba(20, 12, 26, 0.6);
+}
+
+/* Main Content */
+.container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    max-width: 900px;
+    margin: 0 auto;
+    width: 100%;
+    padding-bottom: 100px;
+}
+
+.mainHeading {
+    font-size: 48px;
+    font-weight: 600;
+    margin-bottom: 60px;
+    color: #fff;
+    letter-spacing: -0.5px;
+}
+
+.questionLabel {
+    font-size: 20px;
+    color: #E4B5FF;
+    margin-bottom: 16px;
+    font-weight: 500;
+}
+
+.inputWrapper {
+    position: relative;
+    margin-bottom: 12px;
+}
+
+.inputField {
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    padding: 16px 0;
+    font-size: 32px;
+    color: white;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.2s ease;
+}
+
+.inputField:focus {
+    border-bottom-color: #E4B5FF;
+}
+
+.inputField::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.helperText {
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-top: 12px;
+}
+
+.nextButton {
+    align-self: flex-end;
+    margin-top: 40px;
+    padding: 16px 48px;
+    background: #E4B5FF;
+    color: #1a0e24;
+    font-size: 20px;
+    font-weight: 600;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    transition: transform 0.1s ease, filter 0.1s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nextButton:hover {
+    filter: brightness(1.1);
+    transform: translateY(-2px);
+}
+
+.nextButton:active {
+    transform: translateY(0);
+}
+
+/* Material Icons */
+.material-symbols-rounded {
+    font-family: 'Material Symbols Rounded';
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+}

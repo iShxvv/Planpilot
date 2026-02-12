@@ -42,7 +42,7 @@ export default function LandingPage() {
           <p className={styles.subtitle}>We take the guesswork out of your events</p>
           <button
             className={styles.cta}
-            onClick={() => navigate("/plan")}>
+            onClick={() => navigate("/form")}>
             Get Started
           </button>
         </main>

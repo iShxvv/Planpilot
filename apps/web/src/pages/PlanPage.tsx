@@ -39,22 +39,31 @@ export default function PlanPage() {
     }
   }, []);
 
+  // Check for initial message from FormPage
+  useEffect(() => {
+    const initialMsg = localStorage.getItem('planpilot_initial_message');
+    if (initialMsg) {
+      localStorage.removeItem('planpilot_initial_message');
+      handleSendMessage(initialMsg);
+    }
+  }, []);
+
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [chatMessages]);
 
-  const handleSendMessage = async () => {
-    if (!userInput.trim() || isLoading) return;
+  const handleSendMessage = async (messageOverride?: string) => {
+    const message = messageOverride || userInput;
+    if (!message.trim() || isLoading) return;
 
-    const userMessage = userInput.trim();
     setUserInput("");
     setIsLoading(true);
 
-    setChatMessages((prev) => [...prev, { role: "user", content: userMessage }]);
+    setChatMessages((prev) => [...prev, { role: "user", content: message }]);
 
     try {
       console.log("Current Plan State before send:", currentPlan);
-      const response = await sendPlanMessage(userMessage, currentPlan);
+      const response = await sendPlanMessage(message, currentPlan);
 
       console.log("n8n Response updatedPlan:", response.updatedPlan);
 
@@ -173,7 +182,7 @@ export default function PlanPage() {
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), handleSendMessage())}
               disabled={isLoading}
             />
-            <button className={styles.chatSend} onClick={handleSendMessage} disabled={isLoading} />
+            <button className={styles.chatSend} onClick={() => handleSendMessage()} disabled={isLoading} />
           </div>
         </section>
 

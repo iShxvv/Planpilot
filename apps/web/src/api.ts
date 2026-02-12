@@ -11,7 +11,6 @@ export interface EventPlan {
     schedule: ScheduleItem[];
     vendors: VendorItem[];
     attendees: AttendeeItem[];
-    tasks: TaskItem[];
     notes: NoteItem[];
     aiContext: AIContext;
 }
@@ -31,12 +30,7 @@ export interface EventMetadata {
         country?: string;
     };
     guestCount?: number;
-    budget?: {
-        total?: number;
-        currency?: string;
-        spent?: number;
-        remaining?: number;
-    };
+
     status?: "draft" | "planning" | "confirmed" | "completed";
 }
 
@@ -90,17 +84,10 @@ export interface AttendeeItem {
     plusOne?: boolean;
 }
 
-export interface TaskItem {
-    id: string;
-    title: string;
-    description?: string;
-    category?: string;
-    priority?: "low" | "medium" | "high" | "urgent";
-    status: "todo" | "in_progress" | "completed" | "blocked";
-    dueDate?: string;
-    assignedTo?: string;
-    completedDate?: string;
-}
+
+
+
+
 
 export interface NoteItem {
     id: string;
@@ -137,7 +124,6 @@ export const createEmptyPlan = (): EventPlan => ({
     schedule: [],
     vendors: [],
     attendees: [],
-    tasks: [],
     notes: [],
     aiContext: {
         conversationHistory: [],
@@ -171,6 +157,7 @@ export const sendPlanMessage = async (
             body: JSON.stringify({
                 userMessage,
                 currentPlan: planToSend,
+                currentDate: new Date().toISOString(),
             }),
         });
 

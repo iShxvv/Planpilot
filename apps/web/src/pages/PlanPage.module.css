@@ -707,3 +707,174 @@
 .avatar .material-symbols-rounded {
   font-size: 24px;
 }
+
+/* ===== Email Manager ===== */
+.emailContent {
+  padding: 80px 60px 80px 160px;
+  text-align: left;
+}
+
+.emailHeading {
+  margin: 0 0 20px 0;
+  font-size: 48px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.94);
+}
+
+.emailSub {
+  margin: 0 0 40px 0;
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.82);
+  line-height: 1.5;
+}
+
+.emailButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 360px;
+}
+
+.emailOptionBtn {
+  padding: 20px 32px;
+  border-radius: 16px;
+  background: #E4B5FF;
+  color: #111;
+  border: none;
+  font-size: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 150ms ease, transform 150ms ease;
+  text-align: center;
+}
+
+.emailOptionBtn:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.emailOptionBtn:active {
+  transform: translateY(0);
+}
+
+/* ===== Email Draft ===== */
+.draftContainer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px;
+}
+
+.draftBox {
+  width: 100%;
+  max-width: 1100px;
+  height: 100%;
+  background: rgba(26, 14, 36, 0.75);
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.42);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  overflow: hidden;
+}
+
+.draftHeader {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.closeBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.85);
+  transition: background 150ms ease;
+  padding: 0;
+}
+
+.closeBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.draftTitle {
+  font-size: 20px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.draftActions {
+  margin-left: auto;
+  display: flex;
+  gap: 12px;
+}
+
+.editAttendeesBtn {
+  padding: 10px 20px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 15px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.editAttendeesBtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.sendEmailsBtn {
+  padding: 10px 20px;
+  border-radius: 12px;
+  background: #E4B5FF;
+  color: #111;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 150ms ease, transform 150ms ease;
+}
+
+.sendEmailsBtn:hover {
+  filter: brightness(1.05);
+  transform: translateY(-1px);
+}
+
+.draftBody {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.llmLabel {
+  font-size: 14px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.6);
+  margin-bottom: 16px;
+  letter-spacing: 0.5px;
+}
+
+.llmOutput {
+  flex: 1;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 16px;
+  line-height: 1.6;
+  overflow-y: auto;
+}

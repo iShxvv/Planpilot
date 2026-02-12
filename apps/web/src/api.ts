@@ -431,10 +431,16 @@ export const mergeBudgetEstimate = (
         updatedItems.push(cateringItem);
     }
 
+    // Update target amount if provided in the estimate
+    const targetAmount = estimate.budget_total_aud !== null 
+        ? estimate.budget_total_aud 
+        : plan.budget.targetAmount;
+
     return {
         ...plan,
         budget: {
             ...plan.budget,
+            targetAmount: targetAmount,
             items: updatedItems,
         },
     };

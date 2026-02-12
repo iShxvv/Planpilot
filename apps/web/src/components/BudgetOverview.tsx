@@ -9,6 +9,7 @@ import { formatCurrency, getCategoryColor, getBudgetCalculations } from "../util
 interface BudgetOverviewProps {
   plan: EventPlan;
   onUpdatePlan: (plan: EventPlan) => void;
+  isLoading?: boolean;
 }
 
 function MiniIcon({ kind }: { kind: "edit" | "coin" | "mail" | "user" }) {
@@ -256,6 +257,7 @@ function BudgetTrackerDashboard({ currentPlan, onUpdateTarget }: { currentPlan: 
 export default function BudgetOverview({
   plan,
   onUpdatePlan,
+  isLoading = false,
 }: BudgetOverviewProps) {
   const handleUpdateBudgetTarget = (newTarget: number) => {
     const updatedPlan = {
@@ -271,9 +273,25 @@ export default function BudgetOverview({
   return (
     <>
       <section className={styles.panel}>
-        <div className={styles.panelHeader}>Budget Items</div>
+        <div className={styles.panelHeader}>
+          Budget Items
+          {isLoading && (
+            <span style={{ marginLeft: '10px', fontSize: '14px', color: '#E4B5FF' }}>
+              Updating...
+            </span>
+          )}
+        </div>
         <div className={styles.budgetScroll}>
-          {!plan.budget || plan.budget.items.length === 0 ? (
+          {isLoading ? (
+            <div style={{ padding: "40px", textAlign: "center" }}>
+              <div className={styles.typingIndicator} style={{ display: 'inline-block' }}>
+                <span style={{ fontSize: '24px' }}>💰</span>
+                <p style={{ color: '#E4B5FF', marginTop: '10px' }}>
+                  Calculating budget...
+                </p>
+              </div>
+            </div>
+          ) : !plan.budget || plan.budget.items.length === 0 ? (
             <div style={{ padding: "40px", textAlign: "center" }}>
               <p style={{ color: "#999", marginBottom: "8px" }}>
                 No budget items yet
@@ -326,10 +344,21 @@ export default function BudgetOverview({
       </section>
 
       <section className={styles.panel}>
-        <BudgetTrackerDashboard
-          currentPlan={plan}
-          onUpdateTarget={handleUpdateBudgetTarget}
-        />
+        {isLoading ? (
+          <div style={{ padding: "40px", textAlign: "center" }}>
+            <div className={styles.typingIndicator} style={{ display: 'inline-block' }}>
+              <span style={{ fontSize: '24px' }}>📊</span>
+              <p style={{ color: '#E4B5FF', marginTop: '10px' }}>
+                Updating calculations...
+              </p>
+            </div>
+          </div>
+        ) : (
+          <BudgetTrackerDashboard
+            currentPlan={plan}
+            onUpdateTarget={handleUpdateBudgetTarget}
+          />
+        )}
       </section>
     </>
   );

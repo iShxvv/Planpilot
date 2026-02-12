@@ -33,6 +33,7 @@ export default function PlanPage() {
   const {
     chatMessages,
     isLoading,
+    isBudgetLoading,
     sendMessage,
     setChatMessages,
     addLogMessage,
@@ -106,7 +107,11 @@ export default function PlanPage() {
         )}
 
         {activeTab === "budget" && (
-          <BudgetOverview plan={currentPlan} onUpdatePlan={handleUpdatePlan} />
+          <BudgetOverview 
+            plan={currentPlan} 
+            onUpdatePlan={handleUpdatePlan}
+            isLoading={isBudgetLoading}
+          />
         )}
       </main>
     </div>

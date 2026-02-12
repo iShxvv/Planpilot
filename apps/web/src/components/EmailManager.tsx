@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import styles from "../pages/PlanPage.module.css";
 import { EventPlan } from "../api";
 
@@ -24,45 +24,37 @@ export default function EmailManager({
   const [emailType, setEmailType] = useState<"invites" | "status" | "">("");
   const [isSending, setIsSending] = useState(false);
   const [showCountdown, setShowCountdown] = useState(false);
-  const [countdown, setCountdown] = useState(30);
   const [inviteResults, setInviteResults] = useState<InviteResult[]>([]);
   const [showResults, setShowResults] = useState(false);
 
-  // Countdown timer
-  useEffect(() => {
-    if (showCountdown && countdown > 0) {
-      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-    // Don't auto-fetch when countdown reaches 0 - wait for user to click "See Results"
-  }, [showCountdown, countdown]);
+  // No auto-fetch timer needed as per user request.
 
   const fetchFinalStatuses = async () => {
     onAddLog("Fetching final RSVP statuses...");
-    
+
     try {
       const bookingIds = inviteResults.map(invite => invite.bookingId);
-      
+
       const response = await fetch('https://samuelrath.app.n8n.cloud/webhook/Finalise', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ bookingIds }),
       });
-      
+
       if (response.ok) {
         const rawText = await response.text();
-        
+
         if (!rawText || rawText.trim() === '') {
           onAddLog('Error: Empty response from n8n');
           alert('Failed to fetch results. Please try again.');
           return;
         }
-        
+
         const data = JSON.parse(rawText);
         const result = Array.isArray(data) ? data[0] : data;
-        
+
         onAddLog(`Results: ${result.acceptedCount} accepted, ${result.declinedCount} declined`);
-        
+
         const updatedResults = inviteResults.map(invite => {
           const matchingResult = result.results.find((r: any) => r.bookingId === invite.bookingId);
           return {
@@ -70,7 +62,7 @@ export default function EmailManager({
             status: matchingResult?.finalStatus || "declined",
           };
         });
-        
+
         setInviteResults(updatedResults);
         setShowCountdown(false);
         setShowResults(true);
@@ -91,7 +83,7 @@ export default function EmailManager({
 
     try {
       const results: InviteResult[] = [];
-      
+
       // Send invite for each attendee
       for (const attendee of plan.attendees) {
         try {
@@ -106,12 +98,12 @@ export default function EmailManager({
 
           if (response.ok) {
             const result = await response.json();
-            
+
             // Strip the "=" prefix if n8n returns it
-            const cleanBookingId = typeof result.bookingId === 'string' 
-              ? result.bookingId.replace(/^=/, '') 
+            const cleanBookingId = typeof result.bookingId === 'string'
+              ? result.bookingId.replace(/^=/, '')
               : result.bookingId;
-            
+
             results.push({
               bookingId: cleanBookingId,
               name: attendee.name,
@@ -129,13 +121,12 @@ export default function EmailManager({
 
       const successCount = results.length;
       onAddLog(`Completed: ${successCount}/${plan.attendees.length} invites sent successfully`);
-      
+
       if (successCount > 0) {
         setInviteResults(results);
         setShowEmailDraft(false);
-        setShowCountdown(true);
-        setCountdown(30);
-        onAddLog("Starting 30-second RSVP countdown...");
+        setShowCountdown(true); // "Waiting" state
+        onAddLog("Invites sent. Waiting for responses...");
       } else {
         alert('Failed to send invites. Check the assistant panel for details.');
       }
@@ -152,7 +143,6 @@ export default function EmailManager({
     setShowCountdown(false);
     setShowResults(false);
     setInviteResults([]);
-    setCountdown(30);
   };
 
   return (
@@ -160,62 +150,79 @@ export default function EmailManager({
       <div className={styles.panelHeader}>Email Manager</div>
 
       {showCountdown ? (
-        // Countdown View
+        // Manual Check View (Previously Countdown)
         <div className={styles.emptyState} style={{ textAlign: "center", padding: "60px 20px" }}>
-          <h2 style={{ fontSize: "72px", margin: "0", color: "#E4B5FF" }}>
-            {countdown}
+          <div style={{ fontSize: "64px", marginBottom: "20px" }}>📨</div>
+          <h2 style={{ fontSize: "24px", margin: "0", color: "#E4B5FF" }}>
+            Invites Sent!
           </h2>
-          <p className={styles.muted} style={{ fontSize: "20px", marginTop: "20px" }}>
-            {countdown > 0 ? "Waiting for responses..." : "Time's up!"}
+          <p className={styles.muted} style={{ fontSize: "16px", marginTop: "10px" }}>
+            The invites have been sent to your attendees.
           </p>
-          <p className={styles.muted} style={{ fontSize: "14px" }}>
-            {countdown > 0 
-              ? "Attendees can click Yes or No in their emails"
-              : "Click below to see the final results"
-            }
+          <p className={styles.muted} style={{ fontSize: "14px", marginTop: "4px" }}>
+            Once they respond, click below to update the status.
           </p>
-          
-          {countdown === 0 && (
-            <button
-              onClick={fetchFinalStatuses}
-              style={{
-                marginTop: "30px",
-                padding: "14px 32px",
-                borderRadius: "12px",
-                background: "#E4B5FF",
-                color: "#111",
-                border: "none",
-                fontSize: "18px",
-                fontWeight: "600",
-                cursor: "pointer",
-                transition: "transform 150ms ease, filter 150ms ease"
-              }}
-              onMouseOver={(e) => {
-                e.currentTarget.style.transform = "translateY(-2px)";
-                e.currentTarget.style.filter = "brightness(1.05)";
-              }}
-              onMouseOut={(e) => {
-                e.currentTarget.style.transform = "translateY(0)";
-                e.currentTarget.style.filter = "brightness(1)";
-              }}
-            >
-              See Results
-            </button>
-          )}
+
+          <button
+            onClick={fetchFinalStatuses}
+            style={{
+              marginTop: "30px",
+              padding: "14px 32px",
+              borderRadius: "12px",
+              background: "#E4B5FF",
+              color: "#111",
+              border: "none",
+              fontSize: "18px",
+              fontWeight: "600",
+              cursor: "pointer",
+              transition: "transform 150ms ease, filter 150ms ease"
+            }}
+            onMouseOver={(e) => {
+              e.currentTarget.style.transform = "translateY(-2px)";
+              e.currentTarget.style.filter = "brightness(1.05)";
+            }}
+            onMouseOut={(e) => {
+              e.currentTarget.style.transform = "translateY(0)";
+              e.currentTarget.style.filter = "brightness(1)";
+            }}
+          >
+            Check For Responses
+          </button>
         </div>
       ) : showResults ? (
         // Results Table View
         <div className={styles.planContent}>
-          <h3 style={{ color: "#fff", marginBottom: "20px" }}>RSVP Results</h3>
-          
-          <div style={{ 
-            background: "rgba(0,0,0,0.3)", 
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "20px" }}>
+            <h3 style={{ color: "#fff", margin: 0 }}>RSVP Results</h3>
+            <button
+              onClick={fetchFinalStatuses}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "8px",
+                background: "rgba(255,255,255,0.1)",
+                border: "1px solid rgba(255,255,255,0.2)",
+                color: "#fff",
+                cursor: "pointer",
+                fontSize: "14px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px"
+              }}
+              title="Refresh RSVP statuses"
+            >
+              <span className="material-symbols-rounded" style={{ fontSize: "16px" }}>refresh</span>
+              Check For Responses
+            </button>
+          </div>
+
+          <div style={{
+            background: "rgba(0,0,0,0.3)",
             borderRadius: "12px",
             border: "1px solid rgba(255,255,255,0.1)",
             overflow: "hidden"
           }}>
-            <table style={{ 
-              width: "100%", 
+            <table style={{
+              width: "100%",
               borderCollapse: "collapse",
               color: "#fff"
             }}>
@@ -228,7 +235,7 @@ export default function EmailManager({
               </thead>
               <tbody>
                 {inviteResults.map((result, idx) => (
-                  <tr key={result.bookingId} style={{ 
+                  <tr key={result.bookingId} style={{
                     borderBottom: idx < inviteResults.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none"
                   }}>
                     <td style={{ padding: "12px" }}>{result.name}</td>
@@ -239,16 +246,16 @@ export default function EmailManager({
                         borderRadius: "12px",
                         fontSize: "12px",
                         fontWeight: "600",
-                        background: result.status === "accepted" 
-                          ? "rgba(76, 175, 80, 0.2)" 
+                        background: result.status === "accepted"
+                          ? "rgba(76, 175, 80, 0.2)"
                           : result.status === "declined"
-                          ? "rgba(244, 67, 54, 0.2)"
-                          : "rgba(255, 152, 0, 0.2)",
-                        color: result.status === "accepted" 
-                          ? "#4CAF50" 
+                            ? "rgba(244, 67, 54, 0.2)"
+                            : "rgba(255, 152, 0, 0.2)",
+                        color: result.status === "accepted"
+                          ? "#4CAF50"
                           : result.status === "declined"
-                          ? "#F44336"
-                          : "#FF9800"
+                            ? "#F44336"
+                            : "#FF9800"
                       }}>
                         {result.status.toUpperCase()}
                       </span>
@@ -261,7 +268,7 @@ export default function EmailManager({
 
           <div style={{ marginTop: "20px", display: "flex", gap: "10px", justifyContent: "space-between" }}>
             <div style={{ color: "rgba(255,255,255,0.7)", fontSize: "14px" }}>
-              Accepted: {inviteResults.filter(r => r.status === "accepted").length} | 
+              Accepted: {inviteResults.filter(r => r.status === "accepted").length} |
               Declined: {inviteResults.filter(r => r.status === "declined").length}
             </div>
             <button

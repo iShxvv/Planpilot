@@ -38,15 +38,11 @@ export default function EmailManager({
   }, [showCountdown, countdown]);
 
   const fetchFinalStatuses = async () => {
-    onAddLog("Timer ended. Fetching final RSVP statuses...");
+    onAddLog("Fetching final RSVP statuses...");
     
     try {
-      // Collect all bookingIds
       const bookingIds = inviteResults.map(invite => invite.bookingId);
       
-      onAddLog(`Sending bookingIds: ${JSON.stringify(bookingIds)}`);
-      
-      // Single API call with all bookingIds
       const response = await fetch('https://samuelrath.app.n8n.cloud/webhook/Finalise', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -54,46 +50,36 @@ export default function EmailManager({
       });
       
       if (response.ok) {
-        // Get raw text first
         const rawText = await response.text();
-        console.log('Raw finalise response:', rawText);
-        onAddLog(`Raw response: ${rawText}`);
         
         if (!rawText || rawText.trim() === '') {
           onAddLog('Error: Empty response from n8n');
-          alert('n8n returned empty response. Check your "Respond to Webhook" node.');
+          alert('Failed to fetch results. Please try again.');
           return;
         }
         
-        try {
-          const data = JSON.parse(rawText);
-          
-          console.log('Parsed finalise response:', data);
-          onAddLog(`Results: ${data.acceptedCount} accepted, ${data.declinedCount} declined`);
-          
-          // Map results back to invites
-          const updatedResults = inviteResults.map(invite => {
-            const result = data.results.find((r: any) => r.bookingId === invite.bookingId);
-            return {
-              ...invite,
-              status: result?.finalStatus || "declined",
-            };
-          });
-          
-          setInviteResults(updatedResults);
-          setShowCountdown(false);
-          setShowResults(true);
-          onAddLog("RSVP collection complete!");
-        } catch (parseError) {
-          onAddLog(`Failed to parse JSON. Response was: ${rawText}`);
-          alert('n8n response is not valid JSON. Check your workflow.');
-        }
+        const data = JSON.parse(rawText);
+        const result = Array.isArray(data) ? data[0] : data;
+        
+        onAddLog(`Results: ${result.acceptedCount} accepted, ${result.declinedCount} declined`);
+        
+        const updatedResults = inviteResults.map(invite => {
+          const matchingResult = result.results.find((r: any) => r.bookingId === invite.bookingId);
+          return {
+            ...invite,
+            status: matchingResult?.finalStatus || "declined",
+          };
+        });
+        
+        setInviteResults(updatedResults);
+        setShowCountdown(false);
+        setShowResults(true);
+        onAddLog("RSVP collection complete!");
       } else {
-        onAddLog(`Error: ${response.status} ${response.statusText}`);
-        alert('Failed to fetch results. Check assistant panel.');
+        onAddLog(`Error: ${response.status}`);
+        alert('Failed to fetch results. Please try again.');
       }
     } catch (error) {
-      console.error('Error fetching final statuses:', error);
       onAddLog(`Error: ${String(error)}`);
       alert('An error occurred while fetching results.');
     }

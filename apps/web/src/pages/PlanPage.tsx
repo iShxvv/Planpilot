@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import styles from "./PlanPage.module.css";
 import PlanPageBg from "../assets/images/theme_Background.png";
+import BudgetTrackerDashboard from "../components/BudgetTrackerDashboard";
 import {
   EventPlan,
   loadPlanFromStorage,
@@ -10,7 +11,7 @@ import {
   createEmptyPlan,
 } from "../api";
 
-type TabKey = "plan" | "attendees" | "emails";
+type TabKey = "plan" | "attendees" | "emails" | "budget";
 
 export default function PlanPage() {
   const navigate = useNavigate();
@@ -109,6 +110,7 @@ export default function PlanPage() {
     { key: "plan" as const, label: "Plan", icon: "note_alt" },
     { key: "attendees" as const, label: "Attendees", icon: "person" },
     { key: "emails" as const, label: "Emails", icon: "mail" },
+    { key: "budget" as const, label: "Budget", icon: "payments" },
   ];
 
   return (
@@ -143,7 +145,7 @@ export default function PlanPage() {
         </div>
       </header>
 
-      <main className={styles.shell}>
+      <main className={`${styles.shell} ${activeTab === "budget" ? styles.shellThreeCol : ""}`}>
         <section className={styles.panel}>
           <div className={styles.panelHeader}>Assistant</div>
           <div className={styles.chatMessages}>
@@ -397,6 +399,36 @@ export default function PlanPage() {
               </div>
             )}
           </section>
+        )}
+
+        {activeTab === "budget" && (
+          <>
+            <section className={styles.panel}>
+              <div className={styles.panelHeader}>Budget Items</div>
+              <div className={styles.budgetScroll}>
+                <div className={styles.budgetList}>
+                  <div className={styles.budgetCard} style={{ background: '#6a4a34' }}>
+                    <div className={styles.budgetCategory}>Venue</div>
+                    <div className={styles.budgetName}>Melbourne Town Hall</div>
+                    <div className={styles.budgetPrice}>
+                      $5,000 <span className={styles.budgetPriceType}>for hire</span>
+                    </div>
+                  </div>
+                  <div className={styles.budgetCard} style={{ background: '#6b2a3a' }}>
+                    <div className={styles.budgetCategory}>Catering</div>
+                    <div className={styles.budgetName}>McDonald's</div>
+                    <div className={styles.budgetPrice}>
+                      $15 <span className={styles.budgetPriceType}>per person</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <section className={styles.panel}>
+              <BudgetTrackerDashboard />
+            </section>
+          </>
         )}
 
         {/* Modal for adding attendees manually */}

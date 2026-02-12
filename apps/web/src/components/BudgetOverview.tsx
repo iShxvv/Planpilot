@@ -1,25 +1,28 @@
-import { useState } from "react";
-import styles from "./BudgetTrackerDashboard.module.css";
-import { EventPlan } from "../api";
-import { getBudgetCalculations, formatCurrency, getCategoryColor } from "../utils/budgetCalculations";
 
-interface BudgetTrackerDashboardProps {
-  currentPlan: EventPlan;
-  onUpdateTarget: (newTarget: number) => void;
+import { useState } from "react";
+import styles from "../pages/PlanPage.module.css";
+// We need to import the dashboard styles locally since we are merging the file
+import dashboardStyles from "./BudgetTrackerDashboard.module.css";
+import { EventPlan } from "../api";
+import { formatCurrency, getCategoryColor, getBudgetCalculations } from "../utils/budgetCalculations";
+
+interface BudgetOverviewProps {
+  plan: EventPlan;
+  onUpdatePlan: (plan: EventPlan) => void;
 }
 
 function MiniIcon({ kind }: { kind: "edit" | "coin" | "mail" | "user" }) {
   switch (kind) {
     case "edit":
       return (
-        <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
+        <svg viewBox="0 0 24 24" className={dashboardStyles.iconSvg} aria-hidden="true">
           <path d="M4 17.25V20h2.75L17.81 8.94l-2.75-2.75L4 17.25z" />
           <path d="M20.71 7.04a1 1 0 0 0 0-1.41l-2.34-2.34a1 1 0 0 0-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
         </svg>
       );
     case "coin":
       return (
-        <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
+        <svg viewBox="0 0 24 24" className={dashboardStyles.iconSvg} aria-hidden="true">
           <circle cx="12" cy="12" r="9" />
           <path
             d="M14.5 8.5c0-1-1.1-1.8-2.5-1.8S9.5 7.5 9.5 8.5s1.1 1.8 2.5 1.8 2.5.8 2.5 1.8-1.1 1.8-2.5 1.8-2.5-.8-2.5-1.8"
@@ -31,14 +34,14 @@ function MiniIcon({ kind }: { kind: "edit" | "coin" | "mail" | "user" }) {
       );
     case "mail":
       return (
-        <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
+        <svg viewBox="0 0 24 24" className={dashboardStyles.iconSvg} aria-hidden="true">
           <path d="M4 6h16v12H4z" fill="none" stroke="currentColor" strokeWidth="2" />
           <path d="M4 7l8 6 8-6" fill="none" stroke="currentColor" strokeWidth="2" />
         </svg>
       );
     case "user":
       return (
-        <svg viewBox="0 0 24 24" className={styles.iconSvg} aria-hidden="true">
+        <svg viewBox="0 0 24 24" className={dashboardStyles.iconSvg} aria-hidden="true">
           <circle cx="12" cy="8" r="3.5" />
           <path d="M4 20c1.8-4 13.2-4 16 0" fill="none" stroke="currentColor" strokeWidth="2" />
         </svg>
@@ -48,7 +51,7 @@ function MiniIcon({ kind }: { kind: "edit" | "coin" | "mail" | "user" }) {
   }
 }
 
-export default function BudgetTrackerDashboard({ currentPlan, onUpdateTarget }: BudgetTrackerDashboardProps) {
+function BudgetTrackerDashboard({ currentPlan, onUpdateTarget }: { currentPlan: EventPlan, onUpdateTarget: (n: number) => void }) {
   const [isEditingTarget, setIsEditingTarget] = useState(false);
   const [inputValue, setInputValue] = useState("");
 
@@ -74,15 +77,15 @@ export default function BudgetTrackerDashboard({ currentPlan, onUpdateTarget }: 
   ).length || guestCount;
 
   return (
-    <div className={styles.dashboard}>
+    <div className={dashboardStyles.dashboard}>
       {/* Top Row - 2 Cards */}
-      <div className={styles.topRow}>
+      <div className={dashboardStyles.topRow}>
         {/* Your Target Card */}
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>
-            <span className={styles.cardTitle}>Your Target</span>
+        <div className={dashboardStyles.card}>
+          <div className={dashboardStyles.cardHeader}>
+            <span className={dashboardStyles.cardTitle}>Your Target</span>
             <button 
-              className={styles.editBtn}
+              className={dashboardStyles.editBtn}
               onClick={() => {
                 setIsEditingTarget(true);
                 setInputValue(targetAmount.toString());
@@ -95,7 +98,7 @@ export default function BudgetTrackerDashboard({ currentPlan, onUpdateTarget }: 
           {isEditingTarget ? (
             <input
               type="text"
-              className={styles.targetInput}
+              className={dashboardStyles.targetInput}
               value={inputValue}
               onChange={(e) => {
                 const value = e.target.value.replace(/[^0-9]/g, '');
@@ -117,28 +120,28 @@ export default function BudgetTrackerDashboard({ currentPlan, onUpdateTarget }: 
               placeholder="Enter amount"
             />
           ) : (
-            <div className={styles.targetAmount}>{formatCurrency(targetAmount, currency)}</div>
+            <div className={dashboardStyles.targetAmount}>{formatCurrency(targetAmount, currency)}</div>
           )}
         </div>
 
         {/* Event Total Cost Card */}
-        <div className={styles.card}>
-          <div className={styles.cardTitle}>Event Total Cost</div>
-          <div className={styles.totalCost}>{formatCurrency(totalCost, currency)}</div>
-          <div className={styles.budgetStatus}>
+        <div className={dashboardStyles.card}>
+          <div className={dashboardStyles.cardTitle}>Event Total Cost</div>
+          <div className={dashboardStyles.totalCost}>{formatCurrency(totalCost, currency)}</div>
+          <div className={dashboardStyles.budgetStatus}>
             {hasNoBudget ? (
-              <div className={styles.statusText}>Set a budget target to track spending</div>
+              <div className={dashboardStyles.statusText}>Set a budget target to track spending</div>
             ) : isWithinBudget ? (
               <>
-                <div className={styles.statusText}>Your event is within your budget</div>
-                <div className={styles.statusText}>
+                <div className={dashboardStyles.statusText}>Your event is within your budget</div>
+                <div className={dashboardStyles.statusText}>
                   You have {formatCurrency(Math.abs(remainingBudget), currency)} to spend
                 </div>
               </>
             ) : (
               <>
-                <div className={styles.statusText}>Your event is over budget</div>
-                <div className={styles.statusText}>
+                <div className={dashboardStyles.statusText}>Your event is over budget</div>
+                <div className={dashboardStyles.statusText}>
                   You are {formatCurrency(Math.abs(remainingBudget), currency)} over budget
                 </div>
               </>
@@ -148,17 +151,17 @@ export default function BudgetTrackerDashboard({ currentPlan, onUpdateTarget }: 
       </div>
 
       {/* Middle Row - Budget Breakdown */}
-      <div className={styles.card}>
-        <div className={styles.cardTitle}>Budget Breakdown</div>
+      <div className={dashboardStyles.card}>
+        <div className={dashboardStyles.cardTitle}>Budget Breakdown</div>
         {itemsWithPercentages.length === 0 ? (
           <div style={{ padding: '40px', textAlign: 'center' }}>
             <p style={{ color: '#999', marginBottom: '8px' }}>No budget items yet</p>
             <p style={{ color: '#666', fontSize: '14px' }}>Ask the AI to research costs for your event</p>
           </div>
         ) : (
-          <div className={styles.breakdownContent}>
-            <div className={styles.pieChart}>
-              <svg viewBox="0 0 200 200" className={styles.pieSvg}>
+          <div className={dashboardStyles.breakdownContent}>
+            <div className={dashboardStyles.pieChart}>
+              <svg viewBox="0 0 200 200" className={dashboardStyles.pieSvg}>
                 {itemsWithPercentages.map((item, idx) => {
                   const percentage = item.percentage;
                   const previousPercentages = itemsWithPercentages
@@ -197,7 +200,7 @@ export default function BudgetTrackerDashboard({ currentPlan, onUpdateTarget }: 
                 })}
               </svg>
             </div>
-            <div className={styles.breakdownList}>
+            <div className={dashboardStyles.breakdownList}>
               {itemsWithPercentages.map((item) => {
                 const percentage = item.percentage.toFixed(0);
                 let displayText = "";
@@ -209,9 +212,9 @@ export default function BudgetTrackerDashboard({ currentPlan, onUpdateTarget }: 
                 }
                 
                 return (
-                  <div key={item.id} className={styles.breakdownItem}>
-                    <span className={styles.breakdownDot} style={{ color: getCategoryColor(item.category) }}>●</span>
-                    <span className={styles.breakdownText}>
+                  <div key={item.id} className={dashboardStyles.breakdownItem}>
+                    <span className={dashboardStyles.breakdownDot} style={{ color: getCategoryColor(item.category) }}>●</span>
+                    <span className={dashboardStyles.breakdownText}>
                       {displayText}
                     </span>
                   </div>
@@ -223,29 +226,111 @@ export default function BudgetTrackerDashboard({ currentPlan, onUpdateTarget }: 
       </div>
 
       {/* Bottom Row - 2 Cards */}
-      <div className={styles.bottomRow}>
+      <div className={dashboardStyles.bottomRow}>
         {/* Email Responses Card */}
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>
+        <div className={dashboardStyles.card}>
+          <div className={dashboardStyles.cardHeader}>
             <MiniIcon kind="mail" />
-            <span className={styles.cardTitle}>Email Responses</span>
+            <span className={dashboardStyles.cardTitle}>Email Responses</span>
           </div>
-          <div className={styles.statNumber}>{confirmedAttendees}</div>
-          <div className={styles.statLabel}>Confirmed Attendees</div>
+          <div className={dashboardStyles.statNumber}>{confirmedAttendees}</div>
+          <div className={dashboardStyles.statLabel}>Confirmed Attendees</div>
         </div>
 
         {/* Price Per Person Card */}
-        <div className={styles.card}>
-          <div className={styles.cardHeader}>
+        <div className={dashboardStyles.card}>
+          <div className={dashboardStyles.cardHeader}>
             <MiniIcon kind="user" />
-            <span className={styles.cardTitle}>Price Per Person</span>
+            <span className={dashboardStyles.cardTitle}>Price Per Person</span>
           </div>
-          <div className={styles.statNumber}>
+          <div className={dashboardStyles.statNumber}>
             {confirmedAttendees > 0 ? formatCurrency(perPersonCost, currency) : formatCurrency(0, currency)}
           </div>
-          <div className={styles.statLabel}>Per Attendee</div>
+          <div className={dashboardStyles.statLabel}>Per Attendee</div>
         </div>
       </div>
     </div>
+  );
+}
+
+export default function BudgetOverview({
+  plan,
+  onUpdatePlan,
+}: BudgetOverviewProps) {
+  const handleUpdateBudgetTarget = (newTarget: number) => {
+    const updatedPlan = {
+      ...plan,
+      budget: {
+        ...plan.budget,
+        targetAmount: newTarget,
+      },
+    };
+    onUpdatePlan(updatedPlan);
+  };
+
+  return (
+    <>
+      <section className={styles.panel}>
+        <div className={styles.panelHeader}>Budget Items</div>
+        <div className={styles.budgetScroll}>
+          {!plan.budget || plan.budget.items.length === 0 ? (
+            <div style={{ padding: "40px", textAlign: "center" }}>
+              <p style={{ color: "#999", marginBottom: "8px" }}>
+                No budget items yet
+              </p>
+              <p style={{ color: "#666", fontSize: "14px" }}>
+                Ask the AI about costs to get started
+              </p>
+            </div>
+          ) : (
+            <div className={styles.budgetList}>
+              {plan.budget.items.map((item) => (
+                <div
+                  key={item.id}
+                  className={styles.budgetCard}
+                  style={{ background: getCategoryColor(item.category) }}
+                >
+                  <div className={styles.budgetCategory}>{item.category}</div>
+                  <div className={styles.budgetName}>{item.name}</div>
+                  <div className={styles.budgetPrice}>
+                    {formatCurrency(
+                      item.unitPrice || item.cost,
+                      item.currency
+                    )}{" "}
+                    <span className={styles.budgetPriceType}>
+                      {item.priceType === "per_person"
+                        ? "per person"
+                        : item.priceType === "per_hour"
+                        ? "per hour"
+                        : item.priceType === "per_item"
+                        ? "per item"
+                        : "for hire"}
+                    </span>
+                  </div>
+                  {item.source === "serp_api" && (
+                    <div
+                      style={{
+                        fontSize: "12px",
+                        color: "rgba(255,255,255,0.6)",
+                        marginTop: "4px",
+                      }}
+                    >
+                      Estimated from research
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </section>
+
+      <section className={styles.panel}>
+        <BudgetTrackerDashboard
+          currentPlan={plan}
+          onUpdateTarget={handleUpdateBudgetTarget}
+        />
+      </section>
+    </>
   );
 }

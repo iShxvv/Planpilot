@@ -1,0 +1,241 @@
+/* BudgetTrackerDashboard.module.css */
+
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  height: 100%;
+  padding: 0;
+}
+
+/* ===== Card Styles ===== */
+.card {
+  background: rgba(26, 14, 36, 0.75);
+  border-radius: 22px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 12px 34px rgba(0, 0, 0, 0.42);
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cardHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cardTitle {
+  font-size: 20px;
+  color: rgba(255, 255, 255, 0.92);
+  font-weight: 500;
+}
+
+/* ===== Top Row ===== */
+.topRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+/* ===== Target Card ===== */
+.editBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(228, 181, 255, 0.15);
+  border: 1px solid rgba(228, 181, 255, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #E4B5FF;
+  transition: background 150ms ease;
+  padding: 0;
+}
+
+.editBtn:hover {
+  background: rgba(228, 181, 255, 0.25);
+}
+
+.targetAmount {
+  font-size: 36px;
+  font-weight: 600;
+  color: #E4B5FF;
+  margin-top: 8px;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  line-height: 1.2;
+}
+
+/* Responsive font size for large numbers */
+@container (max-width: 300px) {
+  .targetAmount {
+    font-size: 28px;
+  }
+}
+
+.card {
+  container-type: inline-size;
+}
+
+.targetInput {
+  font-size: 36px;
+  font-weight: 600;
+  color: #E4B5FF;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(228, 181, 255, 0.3);
+  border-radius: 12px;
+  padding: 8px 12px;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.targetInput::placeholder {
+  color: rgba(228, 181, 255, 0.4);
+}
+
+/* ===== Event Total Cost Card ===== */
+.totalCost {
+  font-size: 32px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+  margin-top: 4px;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  line-height: 1.2;
+}
+
+.budgetStatus {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.statusText {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.4;
+}
+
+/* ===== Budget Breakdown ===== */
+.breakdownContent {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 24px;
+  align-items: center;
+  margin-top: 12px;
+}
+
+.pieChart {
+  width: 200px;
+  height: 200px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pieSvg {
+  width: 100%;
+  height: 100%;
+}
+
+.breakdownList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-height: 200px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+
+.breakdownList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.breakdownList::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.breakdownList::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+}
+
+.breakdownList::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.breakdownItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.breakdownDot {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.breakdownText {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.4;
+}
+
+/* ===== Bottom Row ===== */
+.bottomRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.statNumber {
+  font-size: 42px;
+  font-weight: 600;
+  color: #E4B5FF;
+  margin-top: 8px;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  line-height: 1.2;
+}
+
+.statLabel {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 4px;
+}
+
+/* ===== Icon Styles ===== */
+.iconSvg {
+  width: 18px;
+  height: 18px;
+  fill: currentColor;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 1400px) {
+  .breakdownContent {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .pieChart {
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 1024px) {
+  .topRow,
+  .bottomRow {
+    grid-template-columns: 1fr;
+  }
+}

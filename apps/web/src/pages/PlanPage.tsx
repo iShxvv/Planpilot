@@ -9,7 +9,10 @@ import {
   savePlanToStorage,
   sendPlanMessage,
   createEmptyPlan,
+  fetchBudgetEstimate,
+  mergeBudgetEstimate,
 } from "../api";
+import { isBudgetQuery, formatCurrency, getCategoryColor } from "../utils/budgetCalculations";
 
 type TabKey = "plan" | "attendees" | "emails" | "budget";
 
@@ -44,8 +47,12 @@ export default function PlanPage() {
     const initialMsg = localStorage.getItem('planpilot_initial_message');
     if (initialMsg) {
       localStorage.removeItem('planpilot_initial_message');
-      handleSendMessage(initialMsg);
+      // Use setTimeout to ensure state is initialized
+      setTimeout(() => {
+        handleSendMessage(initialMsg);
+      }, 100);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -63,14 +70,60 @@ export default function PlanPage() {
 
     try {
       console.log("Current Plan State before send:", currentPlan);
-      const response = await sendPlanMessage(message, currentPlan);
-
-      console.log("n8n Response updatedPlan:", response.updatedPlan);
-
-      setCurrentPlan(response.updatedPlan);
-      savePlanToStorage(response.updatedPlan);
-
-      setChatMessages((prev) => [...prev, { role: "assistant", content: response.userReply }]);
+      
+      // Check if this is a budget-related query
+      const isBudgetRelated = isBudgetQuery(message);
+      
+      console.log("=== BUDGET QUERY CHECK ===");
+      console.log("Message:", message);
+      console.log("Is budget related?", isBudgetRelated);
+      console.log("Current plan:", currentPlan);
+      
+      if (isBudgetRelated) {
+        // Fetch budget estimate from n8n
+        try {
+          console.log("=== CALLING BUDGET WEBHOOK ===");
+          console.log("Calling fetchBudgetEstimate with:", { currentPlan, message });
+          
+          const budgetEstimate = await fetchBudgetEstimate(currentPlan, message);
+          
+          console.log("=== BUDGET ESTIMATE RESPONSE ===");
+          console.log("Budget estimate:", budgetEstimate);
+          
+          const updatedPlan = mergeBudgetEstimate(currentPlan, budgetEstimate);
+          
+          console.log("=== MERGED PLAN ===");
+          console.log("Updated plan:", updatedPlan);
+          
+          setCurrentPlan(updatedPlan);
+          savePlanToStorage(updatedPlan);
+          
+          // Create a summary response
+          const summaryResponse = `I've researched costs for your event:\n\n` +
+            `• Venue: ${formatCurrency(budgetEstimate.venue_cost_aud, "AUD")}\n` +
+            `• Catering: ${formatCurrency(budgetEstimate.catering_cost_aud, "AUD")}\n` +
+            `• Total Estimated: ${formatCurrency(budgetEstimate.total_estimated_aud, "AUD")}\n\n` +
+            `Status: ${budgetEstimate.status === "plausible" ? "Within budget" : budgetEstimate.status === "over_budget" ? "Over budget" : "No budget set"}\n\n` +
+            `Assumptions:\n${budgetEstimate.assumptions.map(a => `• ${a}`).join('\n')}`;
+          
+          setChatMessages((prev) => [...prev, { role: "assistant", content: summaryResponse }]);
+        } catch (budgetError) {
+          console.error("Budget estimate error:", budgetError);
+          // Fall back to regular chat if budget API fails
+          const response = await sendPlanMessage(message, currentPlan);
+          setCurrentPlan(response.updatedPlan);
+          savePlanToStorage(response.updatedPlan);
+          setChatMessages((prev) => [...prev, { role: "assistant", content: response.userReply }]);
+        }
+      } else {
+        // Regular chat message
+        const response = await sendPlanMessage(message, currentPlan);
+        console.log("n8n Response updatedPlan:", response.updatedPlan);
+        
+        setCurrentPlan(response.updatedPlan);
+        savePlanToStorage(response.updatedPlan);
+        setChatMessages((prev) => [...prev, { role: "assistant", content: response.userReply }]);
+      }
     } catch (error) {
       console.error("Error:", error);
       setChatMessages((prev) => [
@@ -111,6 +164,18 @@ export default function PlanPage() {
   const removeAttendee = (index: number) => {
     const updatedAttendees = currentPlan.attendees.filter((_, idx) => idx !== index);
     const updatedPlan = { ...currentPlan, attendees: updatedAttendees };
+    setCurrentPlan(updatedPlan);
+    savePlanToStorage(updatedPlan);
+  };
+
+  const handleUpdateBudgetTarget = (newTarget: number) => {
+    const updatedPlan = {
+      ...currentPlan,
+      budget: {
+        ...currentPlan.budget,
+        targetAmount: newTarget,
+      },
+    };
     setCurrentPlan(updatedPlan);
     savePlanToStorage(updatedPlan);
   };
@@ -415,27 +480,46 @@ export default function PlanPage() {
             <section className={styles.panel}>
               <div className={styles.panelHeader}>Budget Items</div>
               <div className={styles.budgetScroll}>
-                <div className={styles.budgetList}>
-                  <div className={styles.budgetCard} style={{ background: '#6a4a34' }}>
-                    <div className={styles.budgetCategory}>Venue</div>
-                    <div className={styles.budgetName}>Melbourne Town Hall</div>
-                    <div className={styles.budgetPrice}>
-                      $5,000 <span className={styles.budgetPriceType}>for hire</span>
-                    </div>
+                {!currentPlan.budget || currentPlan.budget.items.length === 0 ? (
+                  <div style={{ padding: '40px', textAlign: 'center' }}>
+                    <p style={{ color: '#999', marginBottom: '8px' }}>No budget items yet</p>
+                    <p style={{ color: '#666', fontSize: '14px' }}>Ask the AI about costs to get started</p>
                   </div>
-                  <div className={styles.budgetCard} style={{ background: '#6b2a3a' }}>
-                    <div className={styles.budgetCategory}>Catering</div>
-                    <div className={styles.budgetName}>McDonald's</div>
-                    <div className={styles.budgetPrice}>
-                      $15 <span className={styles.budgetPriceType}>per person</span>
-                    </div>
+                ) : (
+                  <div className={styles.budgetList}>
+                    {currentPlan.budget.items.map((item) => (
+                      <div 
+                        key={item.id} 
+                        className={styles.budgetCard} 
+                        style={{ background: getCategoryColor(item.category) }}
+                      >
+                        <div className={styles.budgetCategory}>{item.category}</div>
+                        <div className={styles.budgetName}>{item.name}</div>
+                        <div className={styles.budgetPrice}>
+                          {formatCurrency(item.unitPrice || item.cost, item.currency)}{' '}
+                          <span className={styles.budgetPriceType}>
+                            {item.priceType === "per_person" ? "per person" : 
+                             item.priceType === "per_hour" ? "per hour" :
+                             item.priceType === "per_item" ? "per item" : "for hire"}
+                          </span>
+                        </div>
+                        {item.source === "serp_api" && (
+                          <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>
+                            Estimated from research
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
-                </div>
+                )}
               </div>
             </section>
 
             <section className={styles.panel}>
-              <BudgetTrackerDashboard />
+              <BudgetTrackerDashboard 
+                currentPlan={currentPlan} 
+                onUpdateTarget={handleUpdateBudgetTarget}
+              />
             </section>
           </>
         )}

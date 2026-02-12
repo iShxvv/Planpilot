@@ -1,5 +1,12 @@
 import { useState } from "react";
 import styles from "./BudgetTrackerDashboard.module.css";
+import { EventPlan } from "../api";
+import { getBudgetCalculations, formatCurrency, getCategoryColor } from "../utils/budgetCalculations";
+
+interface BudgetTrackerDashboardProps {
+  currentPlan: EventPlan;
+  onUpdateTarget: (newTarget: number) => void;
+}
 
 function MiniIcon({ kind }: { kind: "edit" | "coin" | "mail" | "user" }) {
   switch (kind) {
@@ -41,25 +48,30 @@ function MiniIcon({ kind }: { kind: "edit" | "coin" | "mail" | "user" }) {
   }
 }
 
-export default function BudgetTrackerDashboard() {
+export default function BudgetTrackerDashboard({ currentPlan, onUpdateTarget }: BudgetTrackerDashboardProps) {
   const [isEditingTarget, setIsEditingTarget] = useState(false);
-  const [targetAmount, setTargetAmount] = useState(10000);
   const [inputValue, setInputValue] = useState("");
 
-  // Hardcoded data for now
-  const eventTotalCost = 5750;
-  const confirmedResponses = 50;
-  const pricePerPerson = eventTotalCost / confirmedResponses;
-  const remainingBudget = targetAmount - eventTotalCost;
-  const isWithinBudget = remainingBudget >= 0;
+  // Calculate all budget values dynamically
+  const calculations = getBudgetCalculations(currentPlan);
+  const {
+    totalCost,
+    remainingBudget,
+    perPersonCost,
+    status,
+    itemsWithPercentages,
+    guestCount,
+    targetAmount,
+    currency,
+  } = calculations;
 
-  // Hardcoded budget breakdown
-  const budgetBreakdown = [
-    { name: "Melbourne Town Hall", cost: 5000, color: "#6a4a34", priceType: "for hire", unitPrice: 5000 },
-    { name: "McDonald's", cost: 750, color: "#6b2a3a", priceType: "per person", unitPrice: 15 },
-  ];
+  const isWithinBudget = status === "within_budget";
+  const hasNoBudget = status === "no_budget";
 
-  const totalForPercentage = budgetBreakdown.reduce((sum, item) => sum + item.cost, 0);
+  // Get confirmed attendees count (fallback to guestCount)
+  const confirmedAttendees = currentPlan.attendees.filter(
+    (a) => a.rsvpStatus === "confirmed"
+  ).length || guestCount;
 
   return (
     <div className={styles.dashboard}>
@@ -91,13 +103,13 @@ export default function BudgetTrackerDashboard() {
               }}
               onBlur={() => {
                 const numValue = Number(inputValue) || 0;
-                setTargetAmount(numValue);
+                onUpdateTarget(numValue);
                 setIsEditingTarget(false);
               }}
               onKeyDown={(e) => {
                 if (e.key === 'Enter') {
                   const numValue = Number(inputValue) || 0;
-                  setTargetAmount(numValue);
+                  onUpdateTarget(numValue);
                   setIsEditingTarget(false);
                 }
               }}
@@ -105,27 +117,29 @@ export default function BudgetTrackerDashboard() {
               placeholder="Enter amount"
             />
           ) : (
-            <div className={styles.targetAmount}>${targetAmount.toLocaleString()}</div>
+            <div className={styles.targetAmount}>{formatCurrency(targetAmount, currency)}</div>
           )}
         </div>
 
         {/* Event Total Cost Card */}
         <div className={styles.card}>
           <div className={styles.cardTitle}>Event Total Cost</div>
-          <div className={styles.totalCost}>${eventTotalCost.toLocaleString()}</div>
+          <div className={styles.totalCost}>{formatCurrency(totalCost, currency)}</div>
           <div className={styles.budgetStatus}>
-            {isWithinBudget ? (
+            {hasNoBudget ? (
+              <div className={styles.statusText}>Set a budget target to track spending</div>
+            ) : isWithinBudget ? (
               <>
                 <div className={styles.statusText}>Your event is within your budget</div>
                 <div className={styles.statusText}>
-                  You have ${Math.abs(remainingBudget).toLocaleString()} to spend
+                  You have {formatCurrency(Math.abs(remainingBudget), currency)} to spend
                 </div>
               </>
             ) : (
               <>
                 <div className={styles.statusText}>Your event is over budget</div>
                 <div className={styles.statusText}>
-                  You are ${Math.abs(remainingBudget).toLocaleString()} over budget
+                  You are {formatCurrency(Math.abs(remainingBudget), currency)} over budget
                 </div>
               </>
             )}
@@ -136,69 +150,76 @@ export default function BudgetTrackerDashboard() {
       {/* Middle Row - Budget Breakdown */}
       <div className={styles.card}>
         <div className={styles.cardTitle}>Budget Breakdown</div>
-        <div className={styles.breakdownContent}>
-          <div className={styles.pieChart}>
-            <svg viewBox="0 0 200 200" className={styles.pieSvg}>
-              {budgetBreakdown.map((item, idx) => {
-                const percentage = (item.cost / totalForPercentage) * 100;
-                const previousPercentages = budgetBreakdown
-                  .slice(0, idx)
-                  .reduce((sum, prev) => sum + (prev.cost / totalForPercentage) * 100, 0);
+        {itemsWithPercentages.length === 0 ? (
+          <div style={{ padding: '40px', textAlign: 'center' }}>
+            <p style={{ color: '#999', marginBottom: '8px' }}>No budget items yet</p>
+            <p style={{ color: '#666', fontSize: '14px' }}>Ask the AI to research costs for your event</p>
+          </div>
+        ) : (
+          <div className={styles.breakdownContent}>
+            <div className={styles.pieChart}>
+              <svg viewBox="0 0 200 200" className={styles.pieSvg}>
+                {itemsWithPercentages.map((item, idx) => {
+                  const percentage = item.percentage;
+                  const previousPercentages = itemsWithPercentages
+                    .slice(0, idx)
+                    .reduce((sum, prev) => sum + prev.percentage, 0);
+                  
+                  const startAngle = (previousPercentages / 100) * 360;
+                  const endAngle = startAngle + (percentage / 100) * 360;
+                  
+                  const startRad = (startAngle - 90) * (Math.PI / 180);
+                  const endRad = (endAngle - 90) * (Math.PI / 180);
+                  
+                  const x1 = 100 + 80 * Math.cos(startRad);
+                  const y1 = 100 + 80 * Math.sin(startRad);
+                  const x2 = 100 + 80 * Math.cos(endRad);
+                  const y2 = 100 + 80 * Math.sin(endRad);
+                  
+                  const largeArc = percentage > 50 ? 1 : 0;
+                  
+                  const pathData = [
+                    `M 100 100`,
+                    `L ${x1} ${y1}`,
+                    `A 80 80 0 ${largeArc} 1 ${x2} ${y2}`,
+                    `Z`
+                  ].join(' ');
+                  
+                  return (
+                    <path
+                      key={item.id}
+                      d={pathData}
+                      fill={getCategoryColor(item.category)}
+                      stroke="rgba(255, 255, 255, 0.1)"
+                      strokeWidth="1"
+                    />
+                  );
+                })}
+              </svg>
+            </div>
+            <div className={styles.breakdownList}>
+              {itemsWithPercentages.map((item) => {
+                const percentage = item.percentage.toFixed(0);
+                let displayText = "";
                 
-                const startAngle = (previousPercentages / 100) * 360;
-                const endAngle = startAngle + (percentage / 100) * 360;
-                
-                const startRad = (startAngle - 90) * (Math.PI / 180);
-                const endRad = (endAngle - 90) * (Math.PI / 180);
-                
-                const x1 = 100 + 80 * Math.cos(startRad);
-                const y1 = 100 + 80 * Math.sin(startRad);
-                const x2 = 100 + 80 * Math.cos(endRad);
-                const y2 = 100 + 80 * Math.sin(endRad);
-                
-                const largeArc = percentage > 50 ? 1 : 0;
-                
-                const pathData = [
-                  `M 100 100`,
-                  `L ${x1} ${y1}`,
-                  `A 80 80 0 ${largeArc} 1 ${x2} ${y2}`,
-                  `Z`
-                ].join(' ');
+                if (item.priceType === "per_person" && item.unitPrice && item.quantity) {
+                  displayText = `${item.name} • ${percentage}% • ${formatCurrency(item.unitPrice, currency)} x ${item.quantity} people = ${formatCurrency(item.cost, currency)}`;
+                } else {
+                  displayText = `${item.name} • ${percentage}% • ${formatCurrency(item.cost, currency)}`;
+                }
                 
                 return (
-                  <path
-                    key={idx}
-                    d={pathData}
-                    fill={item.color}
-                    stroke="rgba(255, 255, 255, 0.1)"
-                    strokeWidth="1"
-                  />
+                  <div key={item.id} className={styles.breakdownItem}>
+                    <span className={styles.breakdownDot} style={{ color: getCategoryColor(item.category) }}>●</span>
+                    <span className={styles.breakdownText}>
+                      {displayText}
+                    </span>
+                  </div>
                 );
               })}
-            </svg>
+            </div>
           </div>
-          <div className={styles.breakdownList}>
-            {budgetBreakdown.map((item, idx) => {
-              const percentage = ((item.cost / totalForPercentage) * 100).toFixed(0);
-              let displayText = "";
-              
-              if (item.priceType === "per person") {
-                displayText = `${item.name} • ${percentage}% • $${item.unitPrice} x ${confirmedResponses} people = $${item.cost.toLocaleString()}`;
-              } else {
-                displayText = `${item.name} • ${percentage}% • $${item.cost.toLocaleString()}`;
-              }
-              
-              return (
-                <div key={idx} className={styles.breakdownItem}>
-                  <span className={styles.breakdownDot} style={{ color: item.color }}>●</span>
-                  <span className={styles.breakdownText}>
-                    {displayText}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+        )}
       </div>
 
       {/* Bottom Row - 2 Cards */}
@@ -209,7 +230,7 @@ export default function BudgetTrackerDashboard() {
             <MiniIcon kind="mail" />
             <span className={styles.cardTitle}>Email Responses</span>
           </div>
-          <div className={styles.statNumber}>{confirmedResponses}</div>
+          <div className={styles.statNumber}>{confirmedAttendees}</div>
           <div className={styles.statLabel}>Confirmed Attendees</div>
         </div>
 
@@ -219,7 +240,9 @@ export default function BudgetTrackerDashboard() {
             <MiniIcon kind="user" />
             <span className={styles.cardTitle}>Price Per Person</span>
           </div>
-          <div className={styles.statNumber}>${pricePerPerson.toFixed(2)}</div>
+          <div className={styles.statNumber}>
+            {confirmedAttendees > 0 ? formatCurrency(perPersonCost, currency) : formatCurrency(0, currency)}
+          </div>
           <div className={styles.statLabel}>Per Attendee</div>
         </div>
       </div>

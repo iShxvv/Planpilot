@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './FormPage.module.css';
 import FormPageBg from "../assets/images/theme_Background.png";
+import PlanPilotLogo from "../assets/images/planpilot_logo.png";
 
 export default function FormPage() {
     const [prompt, setPrompt] = useState("");
@@ -28,7 +29,9 @@ export default function FormPage() {
             <header className={styles.topBar}>
                 <div className={styles.headerTitle}>Create a New Event</div>
                 <div className={styles.topRight}>
-                    <div className={styles.brand}>planpilot</div>
+                    <div className={styles.brand}>
+                        <img src={PlanPilotLogo} alt="PlanPilot" style={{ height: '28px' }} />
+                    </div>
                     <button className={styles.homeBtn} onClick={() => navigate('/')}>
                         <span className="material-symbols-rounded">home</span>
                     </button>

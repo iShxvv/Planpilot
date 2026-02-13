@@ -1,5 +1,6 @@
 import styles from "../pages/PlanPage.module.css";
 import { EventPlan } from "../api";
+import PlanPilotLogo from "../assets/images/planpilot_logo.png";
 
 type TabKey = "plan" | "attendees" | "emails" | "budget";
 
@@ -36,11 +37,10 @@ export default function PlanHeader({
             {tabs.map((t) => (
               <button
                 key={t.key}
-                className={`${styles.sliderItem} ${
-                  t.key === activeTab
+                className={`${styles.sliderItem} ${t.key === activeTab
                     ? styles.sliderItemActive
                     : styles.sliderItemInactive
-                }`}
+                  }`}
                 onClick={() => onTabChange(t.key)}
               >
                 <span className={styles.sliderIcon}>
@@ -53,7 +53,9 @@ export default function PlanHeader({
         </div>
       </div>
       <div className={styles.topRight}>
-        <div className={styles.brand}>planpilot</div>
+        <div className={styles.brand}>
+          <img src={PlanPilotLogo} alt="PlanPilot" style={{ height: '24px', filter: 'brightness(1.2)' }} />
+        </div>
         <button className={styles.avatar} onClick={onNavigateHome}>
           <span className="material-symbols-rounded">home</span>
         </button>

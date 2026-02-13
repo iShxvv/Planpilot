@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import styles from "./LandingPage.module.css";
 import { useNavigate } from "react-router-dom";
 import LandingPageBg from "../assets/images/LandingPage_Background.png";
+import PlanPilotLogo from "../assets/images/planpilot_logo.png";
 import { getAllPlans, PlanSummary, deletePlan } from "../api";
 
 export default function LandingPage() {
@@ -37,7 +38,9 @@ export default function LandingPage() {
       <header className={styles.navbar}>
         {/* Left Nav Items (PlanPilot Logo) */}
         <div className={styles.navLeft}>
-          <div className={styles.navItem} onClick={() => scrollToSection('hero')}>planpilot</div>
+          <div className={styles.navItem} onClick={() => scrollToSection('hero')}>
+            <img src={PlanPilotLogo} alt="PlanPilot" style={{ height: '32px', filter: 'brightness(1.2)' }} />
+          </div>
         </div>
 
         {/* Center Nav Items (References on Landing Page) */}
@@ -47,10 +50,6 @@ export default function LandingPage() {
           <div className={styles.navItem} onClick={() => scrollToSection('support')}>Support</div>
         </div>
 
-        {/* Right Nav Items (Login) */}
-        <div className={styles.navRight}>
-          <div className={styles.navItem}>Login</div>
-        </div>
       </header>
 
       {/* Hero Section */}
